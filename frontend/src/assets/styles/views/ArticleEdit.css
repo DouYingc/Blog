@@ -1,0 +1,89 @@
+.article-edit {
+  min-height: 100vh;
+  background-color: #f8fafc;
+}
+
+.header {
+  background-color: #fff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 800;
+  background: linear-gradient(45deg, #409eff, #36cfc9);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  cursor: pointer;
+}
+
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+}
+
+.edit-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+.cover-uploader {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  width: 300px;
+  height: 150px;
+  background-color: #fafafa;
+  transition: border-color 0.2s;
+}
+
+.cover-uploader:hover {
+  border-color: #409EFF;
+}
+
+.cover-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 300px;
+  height: 150px;
+  line-height: 150px;
+  text-align: center;
+}
+
+.cover-image {
+  width: 300px;
+  height: 150px;
+  display: block;
+  object-fit: cover;
+}
+
+/* 编辑器容器适配 */
+.mavon-editor {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  z-index: 1000 !important;
+}
+
+/* 自动保存状态样式 */
+.save-success {
+  color: #67c23a;
+  font-size: 14px;
+}
+
+.save-error {
+  color: #f56c6c;
+  font-size: 14px;
+}

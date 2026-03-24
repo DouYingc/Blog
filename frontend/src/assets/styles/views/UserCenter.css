@@ -1,0 +1,92 @@
+.header {
+  background-color: #fff;
+  border-bottom: 1px solid #dcdfe6;
+}
+
+.header-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 20px;
+  font-weight: bold;
+  color: #409eff;
+  cursor: pointer;
+}
+
+.main {
+  max-width: 1200px;
+  margin: 80px auto 30px;
+  padding: 0 20px;
+}
+
+.pane-content {
+  padding: 20px;
+}
+
+.toolbar {
+  margin-bottom: 20px;
+}
+
+.profile-form {
+  padding-top: 30px;
+}
+
+.avatar-uploader {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  width: 100px;
+  height: 100px;
+}
+
+.avatar-uploader:hover {
+  border-color: #409EFF;
+}
+
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 100px;
+  height: 100px;
+  line-height: 100px;
+  text-align: center;
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  display: block;
+  object-fit: cover;
+}
+
+/* 确保Element UI选项卡正确显示 */
+::v-deep .el-tabs {
+  display: block !important;
+}
+
+::v-deep .el-tabs__header {
+  display: flex !important;
+  border-bottom: 1px solid #dcdfe6 !important;
+  margin-bottom: 20px !important;
+}
+
+::v-deep .el-tabs__nav {
+  display: flex !important;
+}
+
+.user-link {
+  color: #409eff;
+  cursor: pointer;
+}
+
+.user-link:hover {
+  color: #66b1ff;
+  text-decoration: underline;
+}
