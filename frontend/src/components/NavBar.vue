@@ -23,6 +23,8 @@
 
         <el-menu mode="horizontal" router :default-active="$route.path" class="nav-menu">
           <el-menu-item index="/">首页</el-menu-item>
+          <el-menu-item index="/ai-assistant">AI助手</el-menu-item>
+          <el-menu-item index="/users/rank">排行榜</el-menu-item>
           <el-menu-item index="/archives">归档</el-menu-item>
           <el-menu-item index="/messages">留言板</el-menu-item>
           <el-menu-item v-if="!isLoggedIn" index="/login">登录</el-menu-item>
@@ -39,8 +41,8 @@
             <i class="el-icon-arrow-down" style="margin-left: 8px"></i>
           </div>
           <div v-if="userMenuVisible" class="user-dropdown-menu">
-            <div class="dropdown-item" @click="$router.push('/user/center')">个人中心</div>
-            <div class="dropdown-item" v-if="isAdmin" @click="$router.push('/admin')">系统后台</div>
+            <div class="dropdown-item" @click="goToUserCenter">个人中心</div>
+            <div class="dropdown-item" v-if="isAdmin" @click="goToAdmin">系统后台</div>
             <div class="dropdown-item" @click="handleLogout">退出登录</div>
           </div>
         </div>
@@ -126,6 +128,14 @@ export default {
       if (this.$route.path !== '/messages/private') {
         this.$router.push('/messages/private')
       }
+    },
+    goToUserCenter () {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      this.$router.push('/user/center')
+    },
+    goToAdmin () {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      this.$router.push('/admin')
     }
   }
 }

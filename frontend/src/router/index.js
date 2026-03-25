@@ -14,8 +14,12 @@ import ArticleEdit from "../views/admin/ArticleEdit.vue";
 import CategoryList from "../views/admin/CategoryList.vue";
 import TagList from "../views/admin/TagList.vue";
 import CommentList from "../views/admin/CommentList.vue";
+import MessageList from "../views/admin/MessageList.vue";
 import Archives from "../views/Archives.vue";
 import PrivateMessages from "../views/PrivateMessages.vue";
+import TagPage from "../views/TagPage.vue";
+import UserRank from "../views/UserRank.vue";
+import AIAssistant from "../views/AIAssistant.vue";
 
 Vue.use(VueRouter);
 
@@ -30,6 +34,22 @@ const routes = [
     name: "Archives",
     component: Archives,
   },
+  {
+    path: "/tags/:id",
+    name: "TagPage",
+    component: TagPage,
+  },
+  {
+    path: "/users/rank",
+    name: "UserRank",
+    component: UserRank,
+  },
+  {
+    path: "/ai-assistant",
+    name: "AIAssistant",
+    component: AIAssistant,
+  },
+
   {
     path: "/article/new",
     name: "ArticleNew",
@@ -119,6 +139,12 @@ const routes = [
         component: CommentList,
         meta: { requiresAuth: true },
       },
+      {
+        path: "messages",
+        name: "AdminMessages",
+        component: MessageList,
+        meta: { requiresAuth: true },
+      },
     ],
     meta: { requiresAuth: true },
   },
@@ -157,6 +183,11 @@ router.beforeEach((to, from, next) => {
   } else {
     next();
   }
+});
+
+// 全局导航守卫：路由跳转时重置页面滚动位置
+router.afterEach(() => {
+  window.scrollTo({ top: 0, behavior: "smooth" });
 });
 
 export default router;

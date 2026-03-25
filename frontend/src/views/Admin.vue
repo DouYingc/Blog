@@ -25,6 +25,10 @@
             <i class="el-icon-chat-dot-round"></i>
             <span slot="title">评论管理</span>
           </el-menu-item>
+          <el-menu-item index="/admin/messages">
+            <i class="el-icon-message"></i>
+            <span slot="title">留言管理</span>
+          </el-menu-item>
           <el-menu-item index="/">
             <i class="el-icon-s-home"></i>
             <span slot="title">返回前台</span>

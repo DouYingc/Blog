@@ -7,13 +7,13 @@
         <div class="main-layout">
           <!-- 左侧内容区 (75%) -->
           <div class="left-container">
-            <div class="article-list">
+            <div class="articles-grid">
               <template v-if="articles.length > 0">
                 <el-card v-for="article in articles" :key="article.id" class="article-card">
                   <div class="article-item">
                     <!-- 文章封面图 -->
-                    <div v-if="article.cover" class="article-cover" @click="viewDetail(article.id)">
-                      <img :src="article.cover" alt="封面">
+                    <div class="article-cover" @click="viewDetail(article.id)">
+                      <img :src="article.cover || getDefaultCover()" alt="封面">
                     </div>
 
                     <div class="article-content">
@@ -49,6 +49,9 @@
                 </el-card>
                 <el-pagination layout="prev, pager, next" :total="total" :page-size="pageSize"
                   @current-change="handlePageChange" style="text-align: center; margin-top: 20px"></el-pagination>
+
+                <!-- 随机文章推荐 -->
+                <random-articles></random-articles>
               </template>
               <el-card v-else class="empty-card">
                 <el-empty description="该分类下暂无文章"></el-empty>
@@ -84,23 +87,13 @@
               </div>
             </el-card>
 
-            <el-card class="sidebar-card" style="margin-top: 20px">
-              <div slot="header">热门讨论</div>
-              <ul class="sidebar-list">
-                <li v-for="art in hotArticles" :key="art.id" @click="viewDetail(art.id)">
-                  <div class="hot-item">
-                    <span class="hot-title">{{ art.title }}</span>
-                    <span class="hot-views"><i class="el-icon-view"></i> {{ art.views }}</span>
-                  </div>
-                </li>
-              </ul>
-            </el-card>
+            <popular-articles></popular-articles>
 
             <el-card class="sidebar-card" style="margin-top: 20px">
               <div slot="header">热门标签</div>
               <div class="tag-cloud">
                 <el-tag v-for="tag in tags" :key="tag.id" size="small" :type="tagId === tag.id ? 'primary' : 'info'"
-                  style="margin: 5px; cursor: pointer" @click="filterByTag(tag.id)">{{ tag.name }}</el-tag>
+                  style="margin: 5px; cursor: pointer" @click="goToTagPage(tag.id)">{{ tag.name }}</el-tag>
               </div>
             </el-card>
           </div>
@@ -113,10 +106,16 @@
 <script>
 import axios from '../axios'
 import NavBar from '@/components/NavBar.vue'
+import PopularArticles from '@/components/PopularArticles.vue'
+import RandomArticles from '@/components/RandomArticles.vue'
 
 export default {
   name: 'HomeView',
-  components: { NavBar },
+  components: {
+    NavBar,
+    PopularArticles,
+    RandomArticles
+  },
   data () {
     return {
       articles: [],
@@ -129,7 +128,6 @@ export default {
       tagId: null,
       keyword: '',
       recentMessages: [],
-      hotArticles: [],
       currentUser: JSON.parse(localStorage.getItem('user') || '{}')
     }
   },
@@ -149,7 +147,6 @@ export default {
     this.fetchCategories()
     this.fetchTags()
     this.fetchRecentMessages()
-    this.fetchHotArticles()
   },
   watch: {
     '$route.query.keyword' (newVal) {
@@ -159,16 +156,7 @@ export default {
     }
   },
   methods: {
-    async fetchHotArticles () {
-      try {
-        const response = await axios.get('/articles', {
-          params: { limit: 5, order: 'views' } // 后端需支持按阅读量排序
-        })
-        this.hotArticles = response.data.articles
-      } catch (error) {
-        console.error('获取热门文章失败', error)
-      }
-    },
+
     async fetchRecentMessages () {
       try {
         const response = await axios.get('/messages')
@@ -232,11 +220,8 @@ export default {
       this.currentPage = 1
       this.fetchArticles()
     },
-    filterByTag (id) {
-      this.tagId = id
-      this.categoryId = null
-      this.currentPage = 1
-      this.fetchArticles()
+    goToTagPage (id) {
+      this.$router.push(`/tags/${id}`)
     },
     canManage (article) {
       return this.isAdmin || (article.user_id === this.currentUser.id)
@@ -258,6 +243,16 @@ export default {
     },
     viewDetail (id) {
       this.$router.push(`/article/${id}`)
+    },
+    getDefaultCover () {
+      const covers = [
+        'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=tech%20blog%20cover%20with%20code%20and%20technology%20elements&image_size=landscape_16_9',
+        'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=programming%20coding%20laptop%20screen%20with%20code&image_size=landscape_16_9',
+        'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20technology%20digital%20abstract%20background&image_size=landscape_16_9',
+        'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=web%20development%20frontend%20design%20interface&image_size=landscape_16_9',
+        'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=data%20analytics%20dashboard%20charts%20and%20graphs&image_size=landscape_16_9'
+      ]
+      return covers[Math.floor(Math.random() * covers.length)]
     },
     handleLogout () {
       localStorage.removeItem('token')

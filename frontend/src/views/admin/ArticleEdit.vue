@@ -111,9 +111,30 @@ export default {
   created () {
     this.fetchCategories()
     this.fetchTags()
-    if (this.$route.params.id) {
+
+    // 从URL参数获取生成的文章内容
+    if (this.$route.query.content) {
+      try {
+        const content = decodeURIComponent(this.$route.query.content)
+        this.articleForm.content = content
+
+        // 尝试从文章内容中提取标题
+        const titleMatch = content.match(/^#\s*(.*$)/m)
+        if (titleMatch && titleMatch[1]) {
+          this.articleForm.title = titleMatch[1].trim()
+        }
+
+        // 尝试提取摘要（前100个字符）
+        const plainText = content.replace(/#{1,6}\s+/g, '').replace(/\*\*/g, '').replace(/\*/g, '')
+        this.articleForm.summary = plainText.substring(0, 100) + (plainText.length > 100 ? '...' : '')
+
+      } catch (error) {
+        console.error('解析文章内容失败:', error)
+      }
+    } else if (this.$route.params.id) {
       this.fetchArticle(this.$route.params.id)
     }
+
     this.lastSavedContent = this.articleForm.content
   },
   methods: {
@@ -249,21 +270,18 @@ export default {
         const config = {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         }
+        let articleId = id
         if (id) {
           await axios.put(`/articles/${id}`, this.articleForm, config)
           this.$message.success('文章更新成功')
         } else {
-          await axios.post('/articles', this.articleForm, config)
+          const response = await axios.post('/articles', this.articleForm, config)
+          articleId = response.data.id
           this.$message.success('文章发布成功')
         }
 
-        // 根据角色跳转
-        const user = JSON.parse(localStorage.getItem('user') || '{}')
-        if (user.role === 'admin') {
-          this.$router.push('/admin/articles')
-        } else {
-          this.$router.push('/user/center')
-        }
+        // 跳转到文章详情页
+        this.$router.push(`/article/${articleId}`)
       } catch (error) {
         this.$message.error('操作失败')
       }

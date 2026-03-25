@@ -112,6 +112,9 @@ Article.hasMany(Like, { foreignKey: "article_id", as: "Likes" });
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Import models and associations
+require("./models/associations");
+
 // Import routes
 const authRoutes = require("./routes/auth");
 const articleRoutes = require("./routes/articles");
@@ -126,6 +129,8 @@ const notificationRoutes = require("./routes/notifications");
 const searchRoutes = require("./routes/search");
 const followRoutes = require("./routes/follows");
 const privateMessageRoutes = require("./routes/privateMessages");
+const userRoutes = require("./routes/users");
+const aiRoutes = require("./routes/ai");
 const path = require("path");
 
 // Middleware
@@ -156,6 +161,8 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/follows", followRoutes);
 app.use("/api/privateMessages", privateMessageRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/ai", aiRoutes);
 
 // 404 handler
 app.use((req, res) => {

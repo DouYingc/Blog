@@ -84,9 +84,146 @@
 .user-link {
   color: #409eff;
   cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
 .user-link:hover {
   color: #66b1ff;
   text-decoration: underline;
+}
+
+/* 用户头像点击样式 */
+.avatar-clickable {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.avatar-clickable:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 用户列表美化 */
+::v-deep .tab-card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+::v-deep .el-table {
+  border-radius: 8px;
+  overflow: hidden;
+  width: 100% !important;
+}
+
+::v-deep .el-table__header-wrapper,
+::v-deep .el-table__body-wrapper {
+  width: 100% !important;
+  overflow-x: hidden;
+}
+
+::v-deep .el-table__header-wrapper table,
+::v-deep .el-table__body-wrapper table {
+  width: 100% !important;
+}
+
+::v-deep .el-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #4a5568;
+  border-bottom: 2px solid #e2e8f0;
+  padding: 12px 16px;
+}
+
+::v-deep .el-table td {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 12px 16px;
+}
+
+::v-deep .el-table__row:hover {
+  background-color: #f7fafc;
+}
+
+::v-deep .el-table__row {
+  transition: background-color 0.2s ease;
+}
+
+/* 隐藏Element UI表格的伪元素 */
+::v-deep .el-table__header-wrapper::before,
+::v-deep .el-table__body-wrapper::before,
+::v-deep .el-table__footer-wrapper::before {
+  display: none;
+}
+
+::v-deep .el-table__header-wrapper::after,
+::v-deep .el-table__body-wrapper::after,
+::v-deep .el-table__footer-wrapper::after {
+  display: none;
+}
+
+/* 确保列宽度一致 */
+::v-deep .el-table__cell {
+  box-sizing: border-box;
+}
+
+::v-deep .el-table th.el-table__cell {
+  padding-right: 16px;
+}
+
+::v-deep .el-table td.el-table__cell {
+  padding-right: 16px;
+}
+
+/* 修复表格线对齐问题 */
+::v-deep .el-table__header-wrapper {
+  border-bottom: 2px solid #e2e8f0;
+  padding-right: 0 !important;
+}
+
+::v-deep .el-table__body-wrapper {
+  border-top: none;
+  padding-right: 0 !important;
+}
+
+/* 强制表格列对齐 */
+::v-deep .el-table__column {
+  padding-right: 0 !important;
+}
+
+::v-deep .el-table th {
+  padding-right: 0 !important;
+}
+
+::v-deep .el-table td {
+  padding-right: 0 !important;
+}
+
+/* 确保表格容器没有滚动条 */
+::v-deep .el-table__body-wrapper {
+  overflow-x: hidden !important;
+}
+
+::v-deep .el-table__header-wrapper {
+  overflow-x: hidden !important;
+}
+
+/* 操作按钮美化 */
+::v-deep .el-button--text {
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+::v-deep .el-button--text:hover {
+  color: #409eff;
+  background-color: rgba(64, 158, 255, 0.1);
+}
+
+::v-deep .el-button--text[style*="color: #F56C6C"] {
+  color: #f56c6c;
+}
+
+::v-deep .el-button--text[style*="color: #F56C6C"]:hover {
+  color: #f78989;
+  background-color: rgba(245, 108, 108, 0.1);
 }

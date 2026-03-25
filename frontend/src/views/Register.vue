@@ -85,7 +85,10 @@ export default {
         if (valid) {
           try {
             await axios.post('/auth/register', this.registerForm)
-            this.$message.success('注册成功，请登录')
+            this.$message.success({
+              message: '注册成功，请登录',
+              duration: 1500
+            })
             this.$router.push('/login')
           } catch (error) {
             this.$message.error(error.response.data.message || '注册失败')

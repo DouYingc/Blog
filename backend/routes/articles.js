@@ -111,33 +111,123 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get related articles (same category)
+// Get related articles (same category or tags)
 router.get("/:id/related", async (req, res) => {
   try {
     const articleId = req.params.id;
-    const article = await Article.findByPk(articleId);
+    const article = await Article.findByPk(articleId, {
+      include: [
+        { model: Tag, attributes: ["id"], through: { attributes: [] } },
+      ],
+    });
 
     if (!article) {
       return res.status(404).json({ message: "文章不存在" });
     }
 
-    if (!article.category_id) {
+    const tagIds = article.Tags.map((tag) => tag.id);
+
+    const whereCondition = {
+      id: { [Op.ne]: articleId },
+      [Op.or]: [],
+    };
+
+    if (article.category_id) {
+      whereCondition[Op.or].push({ category_id: article.category_id });
+    }
+
+    if (tagIds.length > 0) {
+      whereCondition[Op.or].push({
+        id: {
+          [Op.in]: sequelize.literal(`
+            (SELECT DISTINCT article_id FROM article_tags WHERE tag_id IN (${tagIds.join(",")}))
+          `),
+        },
+      });
+    }
+
+    if (whereCondition[Op.or].length === 0) {
       return res.json([]);
     }
 
     const related = await Article.findAll({
-      where: {
-        category_id: article.category_id,
-        id: { [Op.ne]: articleId },
-      },
+      where: whereCondition,
       limit: 5,
       order: [["views", "DESC"]],
       attributes: ["id", "title", "cover", "created_at", "views"],
+      include: [
+        { model: Category, attributes: ["id", "name"] },
+        { model: Tag, attributes: ["id", "name"], through: { attributes: [] } },
+      ],
     });
 
     res.json(related);
   } catch (error) {
     res.status(500).json({ message: "获取相关推荐失败", error: error.message });
+  }
+});
+
+// Get popular articles (based on views and likes)
+router.get("/popular", async (req, res) => {
+  try {
+    const { limit = 10 } = req.query;
+
+    const popularArticles = await Article.findAll({
+      where: { status: "published" },
+      limit: parseInt(limit),
+      order: [
+        ["views", "DESC"],
+        [
+          sequelize.literal(
+            "(SELECT COUNT(*) FROM likes WHERE likes.article_id = Article.id)",
+          ),
+          "DESC",
+        ],
+        ["created_at", "DESC"],
+      ],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(
+              "(SELECT COUNT(*) FROM likes WHERE likes.article_id = Article.id)",
+            ),
+            "likes_count",
+          ],
+        ],
+      },
+      include: [
+        { model: Category, attributes: ["id", "name"] },
+        { model: Tag, attributes: ["id", "name"], through: { attributes: [] } },
+        { model: User, attributes: ["id", "username"] },
+      ],
+    });
+
+    res.json(popularArticles);
+  } catch (error) {
+    res.status(500).json({ message: "获取热门文章失败", error: error.message });
+  }
+});
+
+// Get random articles
+router.get("/random", async (req, res) => {
+  try {
+    const { limit = 5 } = req.query;
+
+    const randomArticles = await Article.findAll({
+      where: { status: "published" },
+      limit: parseInt(limit),
+      order: sequelize.literal("RAND()"),
+      attributes: ["id", "title", "cover", "created_at", "views"],
+      include: [
+        { model: Category, attributes: ["id", "name"] },
+        { model: Tag, attributes: ["id", "name"], through: { attributes: [] } },
+        { model: User, attributes: ["id", "username"] },
+      ],
+    });
+
+    res.json(randomArticles);
+  } catch (error) {
+    res.status(500).json({ message: "获取随机文章失败", error: error.message });
   }
 });
 
@@ -190,6 +280,7 @@ router.post("/", auth, async (req, res) => {
     tags,
     status,
     is_top,
+    cover,
   } = req.body;
   try {
     // 权限校验：只有管理员可以设置置顶
@@ -225,6 +316,7 @@ router.post("/", auth, async (req, res) => {
       user_id: req.user.id,
       status: status || "published",
       is_top: finalIsTop,
+      cover,
     });
 
     if (Array.isArray(tags) && tags.length > 0) {
@@ -249,6 +341,7 @@ router.put("/:id", auth, async (req, res) => {
     tags,
     status,
     is_top,
+    cover,
   } = req.body;
   try {
     const article = await Article.findByPk(req.params.id);
@@ -293,6 +386,7 @@ router.put("/:id", auth, async (req, res) => {
       category_id,
       status: status || article.status,
       is_top: finalIsTop,
+      cover,
     });
 
     if (Array.isArray(tags)) {

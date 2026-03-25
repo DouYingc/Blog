@@ -52,21 +52,35 @@
                   <span class="label">收藏</span>
                 </div>
                 <div class="interaction-item share-item">
-                  <el-dropdown @command="handleShare">
-                    <el-button type="info" icon="el-icon-share" circle title="分享"></el-button>
-                    <el-dropdown-menu slot="dropdown">
-                      <el-dropdown-item command="copy">复制链接</el-dropdown-item>
-                      <el-dropdown-item command="wechat">微信</el-dropdown-item>
-                      <el-dropdown-item command="weibo">微博</el-dropdown-item>
-                      <el-dropdown-item command="qq">QQ</el-dropdown-item>
+                  <el-dropdown @command="handleShare" trigger="click">
+                    <div class="share-button">
+                      <i class="el-icon-share"></i>
+                      <span>分享</span>
+                    </div>
+                    <el-dropdown-menu slot="dropdown" class="share-dropdown">
+                      <el-dropdown-item command="copy" class="share-option">
+                        <i class="el-icon-link"></i>
+                        <span>复制链接</span>
+                      </el-dropdown-item>
+                      <el-dropdown-item command="wechat" class="share-option">
+                        <i class="el-icon-chat-dot-round"></i>
+                        <span>微信</span>
+                      </el-dropdown-item>
+                      <el-dropdown-item command="weibo" class="share-option">
+                        <i class="el-icon-share"></i>
+                        <span>微博</span>
+                      </el-dropdown-item>
+                      <el-dropdown-item command="qq" class="share-option">
+                        <i class="el-icon-chat-line-round"></i>
+                        <span>QQ</span>
+                      </el-dropdown-item>
                     </el-dropdown-menu>
                   </el-dropdown>
-                  <span class="label">分享</span>
                 </div>
               </div>
             </el-card>
 
-            <related-articles v-if="article.id" :currentArticleId="article.id"></related-articles>
+            <related-articles v-if="article.id" :article-id="article.id"></related-articles>
 
             <el-card class="comments-card" style="margin-top: 20px">
               <div slot="header" class="comment-header-title">全部评论 ({{ commentsCount }})</div>

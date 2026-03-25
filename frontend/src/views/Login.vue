@@ -47,7 +47,10 @@ export default {
             const response = await axios.post('/auth/login', this.loginForm)
             localStorage.setItem('token', response.data.token)
             localStorage.setItem('user', JSON.stringify(response.data.user))
-            this.$message.success('登录成功')
+            this.$message.success({
+              message: '登录成功',
+              duration: 1500
+            })
 
             // 登录后跳转到主页
             this.$router.push('/')

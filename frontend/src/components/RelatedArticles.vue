@@ -1,24 +1,25 @@
 <template>
   <div class="related-articles" v-if="articles.length > 0">
-    <div class="related-title">相关推荐</div>
-    <el-row :gutter="20">
-      <el-col :span="6" v-for="article in articles" :key="article.id">
-        <el-card shadow="hover" :body-style="{ padding: '0px' }" class="related-card"
-          @click.native="goToArticle(article.id)">
-          <div class="image-placeholder" v-if="!article.cover">
-            {{ article.title.charAt(0) }}
+    <div class="section-header">
+      <h3>相关文章</h3>
+      <el-divider></el-divider>
+    </div>
+
+    <div class="articles-list" v-loading="loading">
+      <div v-for="article in articles" :key="article.id" class="article-card"
+        @click="$router.push(`/article/${article.id}`)">
+        <div class="article-content">
+          <h4 class="article-title">{{ article.title }}</h4>
+          <div class="article-meta">
+            <span class="article-category">{{ article.Category?.name || '未分类' }}</span>
+            <span class="article-separator">·</span>
+            <span class="article-views">{{ article.views }} 阅读</span>
+            <span class="article-separator">·</span>
+            <span class="article-date">{{ formatDate(article.created_at) }}</span>
           </div>
-          <img v-else :src="article.cover" class="image">
-          <div style="padding: 14px;">
-            <div class="related-article-title" :title="article.title">{{ article.title }}</div>
-            <div class="related-article-meta">
-              <span><i class="el-icon-view"></i> {{ article.views }}</span>
-              <span>{{ formatDate(article.created_at) }}</span>
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -28,39 +29,46 @@ import axios from '../axios'
 export default {
   name: 'RelatedArticles',
   props: {
-    currentArticleId: {
-      type: [Number, String],
+    articleId: {
+      type: Number,
       required: true
     }
   },
   data () {
     return {
-      articles: []
+      articles: [],
+      loading: false
     }
   },
   watch: {
-    currentArticleId: {
-      handler (val) {
-        if (val) this.fetchRelatedArticles()
+    articleId: {
+      handler () {
+        this.fetchRelatedArticles()
       },
       immediate: true
     }
   },
   methods: {
     async fetchRelatedArticles () {
+      if (!this.articleId) return
+
+      this.loading = true
       try {
-        const response = await axios.get(`/articles/${this.currentArticleId}/related`)
+        const response = await axios.get(`/articles/${this.articleId}/related`)
         this.articles = response.data
       } catch (error) {
-        console.error('Fetch related articles failed', error)
+        console.error('获取相关文章失败:', error)
+      } finally {
+        this.loading = false
       }
     },
-    goToArticle (id) {
-      this.$router.push(`/article/${id}`)
-    },
-    formatDate (date) {
-      if (!date) return ''
-      return new Date(date).toLocaleDateString()
+    formatDate (dateString) {
+      const date = new Date(dateString)
+      return date.toLocaleDateString('zh-CN', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+      })
     }
   }
 }
@@ -69,63 +77,76 @@ export default {
 <style scoped>
 .related-articles {
   margin-top: 40px;
-  border-top: 1px solid #eee;
-  padding-top: 20px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
 }
 
-.related-title {
-  font-size: 20px;
-  font-weight: bold;
+.section-header {
   margin-bottom: 20px;
-  padding-left: 10px;
-  border-left: 4px solid #409EFF;
 }
 
-.related-card {
+.section-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.articles-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.article-card {
+  padding: 16px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   cursor: pointer;
-  transition: all 0.3s;
-  height: 100%;
+  transition: all 0.3s ease;
 }
 
-.related-card:hover {
-  transform: translateY(-5px);
+.article-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
-.related-article-title {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  height: 44px;
-  line-height: 22px;
+.article-content {
+  flex: 1;
 }
 
-.related-article-meta {
-  font-size: 12px;
-  color: #999;
-  display: flex;
-  justify-content: space-between;
+.article-title {
+  margin: 0 0 8px 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #2d3748;
+  line-height: 1.4;
 }
 
-.image {
-  width: 100%;
-  height: 120px;
-  object-fit: cover;
-  display: block;
-}
-
-.image-placeholder {
-  width: 100%;
-  height: 120px;
-  background-color: #f5f7fa;
+.article-meta {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 40px;
-  color: #c0c4cc;
+  font-size: 12px;
+  color: #718096;
+}
+
+.article-separator {
+  margin: 0 6px;
+  color: #cbd5e0;
+}
+
+.article-category {
+  background-color: #ecf5ff;
+  color: #409eff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.article-date {
+  color: #909399;
 }
 </style>

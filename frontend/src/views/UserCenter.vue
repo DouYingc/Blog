@@ -61,15 +61,17 @@
           <el-tab-pane label="我的关注" name="following">
             <el-card shadow="never" class="tab-card">
               <div class="pane-content">
-                <el-table :data="followingList" style="width: 100%" v-loading="loadingFollowing">
+                <el-table :data="followingList" style="width: 100%" v-loading="loadingFollowing" border>
                   <el-table-column label="用户头像" width="80">
                     <template slot-scope="scope">
-                      <el-avatar :size="40" :src="scope.row.avatar || ''" icon="el-icon-user"></el-avatar>
+                      <el-avatar :size="40" :src="scope.row.avatar || ''" icon="el-icon-user"
+                        @click="$router.push(`/user/profile/${scope.row.id}`)" class="avatar-clickable"></el-avatar>
                     </template>
                   </el-table-column>
-                  <el-table-column label="用户名" width="150">
+                  <el-table-column label="用户名" min-width="150">
                     <template slot-scope="scope">
-                      <span @click="$router.push(`/profile/${scope.row.id}`)" class="user-link">{{ scope.row.username
+                      <span @click="$router.push(`/user/profile/${scope.row.id}`)" class="user-link">{{
+                        scope.row.username
                       }}</span>
                     </template>
                   </el-table-column>
@@ -89,16 +91,18 @@
           <el-tab-pane label="我的粉丝" name="followers">
             <el-card shadow="never" class="tab-card">
               <div class="pane-content">
-                <el-table :data="followersList" style="width: 100%" v-loading="loadingFollowers">
+                <el-table :data="followersList" style="width: 100%" v-loading="loadingFollowers" border>
                   <el-table-column label="用户头像" width="80">
                     <template slot-scope="scope">
-                      <el-avatar :size="40" :src="scope.row.avatar || ''" icon="el-icon-user"></el-avatar>
+                      <el-avatar :size="40" :src="scope.row.avatar || ''" icon="el-icon-user"
+                        @click="$router.push(`/user/profile/${scope.row.id}`)" class="avatar-clickable"></el-avatar>
                     </template>
                   </el-table-column>
-                  <el-table-column label="用户名" width="150">
+                  <el-table-column label="用户名" min-width="150">
                     <template slot-scope="scope">
-                      <span @click="$router.push(`/profile/${scope.row.id}`)" class="user-link">{{ scope.row.username
-                      }}</span>
+                      <span @click="$router.push(`/user/profile/${scope.row.id}`)" class="user-link">{{
+                        scope.row.username
+                        }}</span>
                     </template>
                   </el-table-column>
                   <el-table-column label="操作" width="120" align="center">
