@@ -188,8 +188,7 @@ router.post("/generate-article", async (req, res) => {
         wordCount = "2000字左右";
         break;
       default:
-        wordCount = "1000字左右";
-    }
+        wordCount = "1000字左右";    }
 
     // 根据文章类型设置风格
     let style = "";

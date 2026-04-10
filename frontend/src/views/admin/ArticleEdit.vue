@@ -169,6 +169,7 @@ export default {
 
         this.articleForm = {
           ...article,
+          is_top: article.is_top ? 1 : 0,
           tags: article.Tags.map(t => t.id)
         }
       } catch (error) {

@@ -119,7 +119,7 @@ router.get("/:id", async (req, res) => {
     const userId = req.params.id;
 
     const user = await User.findByPk(userId, {
-      attributes: ["id", "username", "avatar", "created_at"],
+      attributes: ["id", "username", "avatar", "created_at", "role", "email"],
     });
 
     if (!user) {
@@ -154,6 +154,118 @@ router.get("/:id", async (req, res) => {
     res.json(userData);
   } catch (error) {
     res.status(500).json({ message: "获取用户信息失败", error: error.message });
+  }
+});
+
+// Update user role
+router.put("/:id/role", async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { role } = req.body;
+
+    if (!["admin", "visitor"].includes(role)) {
+      return res.status(400).json({ message: "无效的角色" });
+    }
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    await user.update({ role });
+    res.json({ message: "角色更新成功", user: { ...user.toJSON(), role } });
+  } catch (error) {
+    res.status(500).json({ message: "角色更新失败", error: error.message });
+  }
+});
+
+// Delete user
+router.delete("/:id", async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: "用户不存在" });
+    }
+
+    if (user.role === "admin") {
+      return res.status(400).json({ message: "不能删除管理员账号" });
+    }
+
+    // Delete associated data
+    await Comment.destroy({ where: { user_id: userId } });
+    await Like.destroy({ where: { user_id: userId } });
+    await Article.destroy({ where: { user_id: userId } });
+    
+    await user.destroy();
+    res.json({ message: "用户删除成功" });
+  } catch (error) {
+    res.status(500).json({ message: "用户删除失败", error: error.message });
+  }
+});
+
+// Get all users with pagination and filters
+router.get("/", async (req, res) => {
+  try {
+    const { page = 1, size = 10, search, role } = req.query;
+    
+    const where = {};
+    if (search) {
+      where.username = { [Op.like]: `%${search}%` };
+    }
+    if (role) {
+      where.role = role;
+    }
+
+    const users = await User.findAll({
+      where,
+      attributes: [
+        "id",
+        "username",
+        "avatar",
+        "created_at",
+        "role",
+        [
+          sequelize.literal(
+            "(SELECT COUNT(*) FROM articles WHERE articles.user_id = User.id)",
+          ),
+          "articles_count",
+        ],
+        [
+          sequelize.literal(
+            "(SELECT COUNT(*) FROM comments WHERE comments.user_id = User.id)",
+          ),
+          "comments_count",
+        ],
+        [
+          sequelize.literal(
+            "(SELECT SUM(articles.views) FROM articles WHERE articles.user_id = User.id)",
+          ),
+          "total_views",
+        ],
+        [
+          sequelize.literal(
+            "(SELECT COUNT(*) FROM likes WHERE likes.user_id = User.id)",
+          ),
+          "total_likes",
+        ],
+      ],
+      order: [["created_at", "DESC"]],
+      limit: parseInt(size),
+      offset: (parseInt(page) - 1) * parseInt(size),
+    });
+
+    const total = await User.count({ where });
+
+    res.json({
+      users,
+      total,
+      page: parseInt(page),
+      size: parseInt(size)
+    });
+  } catch (error) {
+    res.status(500).json({ message: "获取用户列表失败", error: error.message });
   }
 });
 

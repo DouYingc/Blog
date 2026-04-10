@@ -1,7 +1,7 @@
 <template>
   <div class="login">
     <el-card class="login-card">
-      <div slot="header" class="login-title">管理员登录</div>
+      <div slot="header" class="login-title">用户登录</div>
       <el-form :model="loginForm" :rules="rules" ref="loginForm" label-width="0">
         <el-form-item prop="username">
           <el-input v-model="loginForm.username" prefix-icon="el-icon-user" placeholder="用户名"></el-input>
@@ -12,10 +12,10 @@
         <el-form-item>
           <el-button type="primary" @click="handleLogin" class="login-button">登录</el-button>
         </el-form-item>
-        <el-form-item style="text-align: center">
-          没有账号？<router-link to="/register">立即注册</router-link>
-          <el-divider direction="vertical"></el-divider>
-          <router-link to="/">返回首页</router-link>
+        <el-form-item class="login-links">
+          没有账号？<router-link to="/register" class="register-link">立即注册</router-link>
+          <el-divider direction="vertical" class="divider"></el-divider>
+          <router-link to="/" class="home-link">返回首页</router-link>
         </el-form-item>
       </el-form>
     </el-card>
@@ -72,20 +72,109 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f5f7f9;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.login::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
 .login-card {
-  width: 400px;
+  width: 420px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
 }
 
 .login-title {
   text-align: center;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
+  color: #333;
+  margin-bottom: 30px;
+  padding: 20px 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .login-button {
   width: 100%;
+  height: 48px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.login-button:active {
+  transform: translateY(0);
+}
+
+.el-input__inner {
+  height: 48px;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  transition: all 0.3s ease;
+  font-size: 15px;
+}
+
+.el-input__inner:focus {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.el-form-item {
+  margin-bottom: 20px;
+}
+
+.el-icon-user,
+.el-icon-lock {
+  color: #667eea;
+}
+
+.login-links {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+.register-link,
+.home-link {
+  color: #667eea;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  margin: 0 8px;
+}
+
+.register-link:hover,
+.home-link:hover {
+  color: #764ba2;
+  text-decoration: underline;
+}
+
+.divider {
+  margin: 0 10px;
+  color: #ddd;
 }
 </style>

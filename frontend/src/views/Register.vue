@@ -20,8 +20,8 @@
         <el-form-item>
           <el-button type="primary" @click="handleRegister" class="register-button">立即注册</el-button>
         </el-form-item>
-        <el-form-item style="text-align: center">
-          已有账号？<router-link to="/login">去登录</router-link>
+        <el-form-item class="register-links">
+          已有账号？<router-link to="/login" class="login-link">去登录</router-link>
         </el-form-item>
       </el-form>
     </el-card>
@@ -108,20 +108,103 @@ export default {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background-color: #f5f7f9;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.register::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
 .register-card {
-  width: 400px;
+  width: 420px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
 }
 
 .register-title {
   text-align: center;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: bold;
+  color: #333;
+  margin-bottom: 30px;
+  padding: 20px 0;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .register-button {
   width: 100%;
+  height: 48px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.register-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(245, 87, 108, 0.3);
+}
+
+.register-button:active {
+  transform: translateY(0);
+}
+
+.el-input__inner {
+  height: 48px;
+  border-radius: 8px;
+  border: 2px solid #e0e0e0;
+  transition: all 0.3s ease;
+  font-size: 15px;
+}
+
+.el-input__inner:focus {
+  border-color: #f5576c;
+  box-shadow: 0 0 0 2px rgba(245, 87, 108, 0.1);
+}
+
+.el-form-item {
+  margin-bottom: 20px;
+}
+
+.el-icon-user,
+.el-icon-message,
+.el-icon-lock {
+  color: #f5576c;
+}
+
+.register-links {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 14px;
+  color: #666;
+}
+
+.login-link {
+  color: #f5576c;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  margin-left: 5px;
+}
+
+.login-link:hover {
+  color: #f093fb;
+  text-decoration: underline;
 }
 </style>

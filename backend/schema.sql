@@ -8,6 +8,9 @@ CREATE TABLE IF NOT EXISTS users (
   password VARCHAR(255) NOT NULL,
   email VARCHAR(100),
   role ENUM('admin', 'visitor') DEFAULT 'admin',
+  avatar VARCHAR(255),
+  bio TEXT COMMENT '个人简介',
+  social_links JSON COMMENT '社交链接',
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

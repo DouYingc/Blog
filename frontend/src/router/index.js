@@ -15,6 +15,7 @@ import CategoryList from "../views/admin/CategoryList.vue";
 import TagList from "../views/admin/TagList.vue";
 import CommentList from "../views/admin/CommentList.vue";
 import MessageList from "../views/admin/MessageList.vue";
+import UserList from "../views/admin/UserList.vue";
 import Archives from "../views/Archives.vue";
 import PrivateMessages from "../views/PrivateMessages.vue";
 import TagPage from "../views/TagPage.vue";
@@ -145,6 +146,12 @@ const routes = [
         component: MessageList,
         meta: { requiresAuth: true },
       },
+      {
+        path: "users",
+        name: "AdminUsers",
+        component: UserList,
+        meta: { requiresAuth: true },
+      },
     ],
     meta: { requiresAuth: true },
   },
@@ -172,6 +179,7 @@ router.beforeEach((to, from, next) => {
         "/admin/tags",
         "/admin/comments",
         "/admin/articles",
+        "/admin/users",
       ];
       if (adminOnlyPaths.includes(to.path) && user.role !== "admin") {
         Vue.prototype.$message.error("您不是管理员，无权进入后台管理页面");

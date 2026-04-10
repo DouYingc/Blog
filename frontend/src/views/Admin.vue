@@ -29,6 +29,10 @@
             <i class="el-icon-message"></i>
             <span slot="title">留言管理</span>
           </el-menu-item>
+          <el-menu-item index="/admin/users">
+            <i class="el-icon-user"></i>
+            <span slot="title">用户管理</span>
+          </el-menu-item>
           <el-menu-item index="/">
             <i class="el-icon-s-home"></i>
             <span slot="title">返回前台</span>
