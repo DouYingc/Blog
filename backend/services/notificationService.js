@@ -2,8 +2,8 @@
  * 通知服务
  * 功能：处理通知相关的业务逻辑，包括创建通知、获取通知列表、标记通知为已读等
  */
-const Notification = require('../models/Notification'); // 通知模型
-const User = require('../models/User'); // 用户模型
+const Notification = require("../models/Notification"); // 通知模型
+const User = require("../models/User"); // 用户模型
 
 class NotificationService {
   /**
@@ -16,7 +16,14 @@ class NotificationService {
    * @param {string} content - 通知内容
    * @returns {Promise<object>} 创建的通知对象
    */
-  static async createNotification(user_id, sender_id, type, target_id, target_type, content) {
+  static async createNotification(
+    user_id,
+    sender_id,
+    type,
+    target_id,
+    target_type,
+    content,
+  ) {
     try {
       const notification = await Notification.create({
         user_id,
@@ -25,11 +32,11 @@ class NotificationService {
         target_id,
         target_type,
         content,
-        is_read: false
+        is_read: false,
       });
       return notification;
     } catch (error) {
-      console.error('创建通知失败:', error);
+      console.error("创建通知失败:", error);
       throw error;
     }
   }
@@ -44,26 +51,26 @@ class NotificationService {
   static async getNotificationsByUserId(user_id, page = 1, limit = 20) {
     try {
       const offset = (page - 1) * limit;
-      
+
       const notifications = await Notification.findAll({
         where: { user_id },
         include: [
           {
             model: User,
-            as: 'sender',
-            attributes: ['id', 'username', 'avatar']
-          }
+            as: "sender",
+            attributes: ["id", "username", "avatar"],
+          },
         ],
-        order: [['created_at', 'DESC']],
+        order: [["created_at", "DESC"]],
         limit: parseInt(limit),
-        offset: parseInt(offset)
+        offset: parseInt(offset),
       });
 
       const total = await Notification.count({ where: { user_id } });
 
       return { notifications, total };
     } catch (error) {
-      console.error('获取通知失败:', error);
+      console.error("获取通知失败:", error);
       throw error;
     }
   }
@@ -82,7 +89,7 @@ class NotificationService {
       }
       return notification;
     } catch (error) {
-      console.error('标记通知已读失败:', error);
+      console.error("标记通知已读失败:", error);
       throw error;
     }
   }
@@ -96,11 +103,11 @@ class NotificationService {
     try {
       await Notification.update(
         { is_read: true },
-        { where: { user_id, is_read: false } }
+        { where: { user_id, is_read: false } },
       );
       return true;
     } catch (error) {
-      console.error('标记所有通知已读失败:', error);
+      console.error("标记所有通知已读失败:", error);
       throw error;
     }
   }
@@ -113,11 +120,11 @@ class NotificationService {
   static async getUnreadCount(user_id) {
     try {
       const count = await Notification.count({
-        where: { user_id, is_read: false }
+        where: { user_id, is_read: false },
       });
       return count;
     } catch (error) {
-      console.error('获取未读通知数量失败:', error);
+      console.error("获取未读通知数量失败:", error);
       throw error;
     }
   }

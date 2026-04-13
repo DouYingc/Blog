@@ -58,6 +58,8 @@ export default {
     this.fetchNotifications()
     // 设置定时轮询，每30秒检查一次新通知
     this.startNotificationTimer()
+    // 添加全局点击事件监听器，实现点击外部关闭通知
+    document.addEventListener('click', this.handleClickOutside)
   },
   /**
    * 组件销毁前执行
@@ -67,6 +69,8 @@ export default {
     if (this.notificationTimer) {
       clearInterval(this.notificationTimer)
     }
+    // 移除全局点击事件监听器
+    document.removeEventListener('click', this.handleClickOutside)
   },
   /**
    * 计算属性
@@ -284,6 +288,19 @@ export default {
       } else {
         return time.toLocaleDateString()
       }
+    },
+
+    /**
+     * 处理点击外部事件，关闭通知弹窗
+     * @param {Event} event - 点击事件
+     */
+    handleClickOutside (event) {
+      // 获取通知铃铛元素
+      const notificationBell = this.$el
+      // 检查点击是否发生在通知组件外部
+      if (notificationBell && !notificationBell.contains(event.target)) {
+        this.showNotifications = false
+      }
     }
   }
 }</script>
@@ -311,7 +328,8 @@ export default {
 .notification-dropdown {
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 320px;
   background-color: white;
   border: 1px solid #ebeef5;
