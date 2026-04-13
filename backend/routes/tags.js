@@ -1,10 +1,18 @@
+/**
+ * 标签管理路由
+ * 功能：处理标签的CRUD操作，支持热门标签查询
+ */
 const express = require("express");
 const router = express.Router();
 const Tag = require("../models/Tag");
 const { sequelize } = require("../config/db");
 const { adminAuth } = require("../middleware/auth");
 
-// 获取所有标签
+/**
+ * 获取所有标签
+ * @route GET /api/tags
+ * @returns {array} 标签列表
+ */
 router.get("/", async (req, res) => {
   try {
     const tags = await Tag.findAll();
@@ -14,7 +22,12 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 获取热门标签（标签云）
+/**
+ * 获取热门标签（标签云）
+ * @route GET /api/tags/popular
+ * @param {number} limit - 限制返回数量，默认20
+ * @returns {array} 热门标签列表，包含文章数量
+ */
 router.get("/popular", async (req, res) => {
   try {
     const limit = parseInt(req.query.limit) || 20;
@@ -46,7 +59,12 @@ router.get("/popular", async (req, res) => {
   }
 });
 
-// 创建标签 (仅管理员)
+/**
+ * 创建标签 (仅管理员)
+ * @route POST /api/tags
+ * @param {string} name - 标签名称
+ * @returns {object} 创建的标签
+ */
 router.post("/", adminAuth, async (req, res) => {
   const { name } = req.body;
   try {
@@ -57,7 +75,13 @@ router.post("/", adminAuth, async (req, res) => {
   }
 });
 
-// 更新标签 (仅管理员)
+/**
+ * 更新标签 (仅管理员)
+ * @route PUT /api/tags/:id
+ * @param {number} id - 标签ID
+ * @param {string} name - 标签名称
+ * @returns {object} 更新后的标签
+ */
 router.put("/:id", adminAuth, async (req, res) => {
   const { name } = req.body;
   try {
@@ -72,7 +96,12 @@ router.put("/:id", adminAuth, async (req, res) => {
   }
 });
 
-// 删除标签 (仅管理员)
+/**
+ * 删除标签 (仅管理员)
+ * @route DELETE /api/tags/:id
+ * @param {number} id - 标签ID
+ * @returns {object} 操作结果
+ */
 router.delete("/:id", adminAuth, async (req, res) => {
   try {
     const tag = await Tag.findByPk(req.params.id);
@@ -86,4 +115,5 @@ router.delete("/:id", adminAuth, async (req, res) => {
   }
 });
 
+// 导出路由
 module.exports = router;

@@ -1,3 +1,7 @@
+/**
+ * 文章管理路由
+ * 功能：处理文章的CRUD操作、相关推荐、热门文章、随机文章等
+ */
 const express = require("express");
 const router = express.Router();
 const Article = require("../models/Article");
@@ -10,7 +14,42 @@ const { sequelize } = require("../config/db");
 const Like = require("../models/Like");
 const Favorite = require("../models/Favorite");
 
-// Get all articles (with pagination and filtering)
+/**
+ * 从内容中提取摘要
+ * @param {string} content - 文章内容
+ * @returns {string} 提取的摘要
+ */
+function extractSummary(content) {
+  // 移除Markdown标记和HTML标签，提取前150个字符作为摘要
+  const plainText = content
+    .replace(/\[.*?\]\(.*?\)/g, "") // 移除链接
+    .replace(/#{1,6}\s/g, "") // 移除标题
+    .replace(/\*\*(.*?)\*\*/g, "$1") // 移除粗体
+    .replace(/\*(.*?)\*/g, "$1") // 移除斜体
+    .replace(/`{3}[\s\S]*?`{3}/g, "") // 移除代码块
+    .replace(/`(.*?)`/g, "$1") // 移除行内代码
+    .replace(/!\[.*?\]\(.*?\)/g, "") // 移除图片
+    .replace(/<[^>]+>/g, "") // 移除HTML标签
+    .trim();
+
+  return plainText.length > 150
+    ? plainText.substring(0, 150) + "..."
+    : plainText;
+}
+
+/**
+ * 获取文章列表（支持分页和筛选）
+ * @route GET /api/articles
+ * @param {number} page - 页码，默认1
+ * @param {number} limit - 每页数量，默认10
+ * @param {number} category_id - 分类ID
+ * @param {number} tag_id - 标签ID
+ * @param {string} keyword - 搜索关键词
+ * @param {number} user_id - 作者ID
+ * @param {string} order - 排序方式，date或views
+ * @param {string} type - 类型，archives表示归档
+ * @returns {object} 文章列表和分页信息
+ */
 router.get("/", async (req, res) => {
   const {
     page = 1,
@@ -111,7 +150,12 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get related articles (same category or tags)
+/**
+ * 获取相关文章（同分类或同标签）
+ * @route GET /api/articles/:id/related
+ * @param {number} id - 文章ID
+ * @returns {array} 相关文章列表
+ */
 router.get("/:id/related", async (req, res) => {
   try {
     const articleId = req.params.id;
@@ -167,7 +211,12 @@ router.get("/:id/related", async (req, res) => {
   }
 });
 
-// Get popular articles (based on views and likes)
+/**
+ * 获取热门文章（基于浏览量和点赞数）
+ * @route GET /api/articles/popular
+ * @param {number} limit - 数量限制，默认10
+ * @returns {array} 热门文章列表
+ */
 router.get("/popular", async (req, res) => {
   try {
     const { limit = 10 } = req.query;
@@ -208,7 +257,12 @@ router.get("/popular", async (req, res) => {
   }
 });
 
-// Get random articles
+/**
+ * 获取随机文章
+ * @route GET /api/articles/random
+ * @param {number} limit - 数量限制，默认5
+ * @returns {array} 随机文章列表
+ */
 router.get("/random", async (req, res) => {
   try {
     const { limit = 5 } = req.query;
@@ -231,7 +285,12 @@ router.get("/random", async (req, res) => {
   }
 });
 
-// Get article detail
+/**
+ * 获取文章详情
+ * @route GET /api/articles/:id
+ * @param {number} id - 文章ID
+ * @returns {object} 文章详情
+ */
 router.get("/:id", async (req, res) => {
   try {
     const articleId = req.params.id;
@@ -269,7 +328,20 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Create article
+/**
+ * 创建文章
+ * @route POST /api/articles
+ * @param {string} title - 文章标题
+ * @param {string} content - 文章内容（Markdown）
+ * @param {string} html_content - 文章内容（HTML）
+ * @param {string} summary - 文章摘要
+ * @param {number} category_id - 分类ID
+ * @param {array} tags - 标签ID数组
+ * @param {string} status - 文章状态
+ * @param {boolean} is_top - 是否置顶
+ * @param {string} cover - 文章封面
+ * @returns {object} 创建的文章
+ */
 router.post("/", auth, async (req, res) => {
   const {
     title,
@@ -289,22 +361,7 @@ router.post("/", auth, async (req, res) => {
     // 如果没有提供摘要，自动从内容中提取
     let finalSummary = summary;
     if (!finalSummary && content) {
-      // 移除Markdown标记和HTML标签，提取前150个字符作为摘要
-      const plainText = content
-        .replace(/\[.*?\]\(.*?\)/g, "") // 移除链接
-        .replace(/#{1,6}\s/g, "") // 移除标题
-        .replace(/\*\*(.*?)\*\*/g, "$1") // 移除粗体
-        .replace(/\*(.*?)\*/g, "$1") // 移除斜体
-        .replace(/`{3}[\s\S]*?`{3}/g, "") // 移除代码块
-        .replace(/`(.*?)`/g, "$1") // 移除行内代码
-        .replace(/!\[.*?\]\(.*?\)/g, "") // 移除图片
-        .replace(/<[^>]+>/g, "") // 移除HTML标签
-        .trim();
-
-      finalSummary =
-        plainText.length > 150
-          ? plainText.substring(0, 150) + "..."
-          : plainText;
+      finalSummary = extractSummary(content);
     }
 
     const article = await Article.create({
@@ -330,7 +387,21 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
-// Update article (Admin or Owner only)
+/**
+ * 更新文章（仅管理员或文章所有者）
+ * @route PUT /api/articles/:id
+ * @param {number} id - 文章ID
+ * @param {string} title - 文章标题
+ * @param {string} content - 文章内容（Markdown）
+ * @param {string} html_content - 文章内容（HTML）
+ * @param {string} summary - 文章摘要
+ * @param {number} category_id - 分类ID
+ * @param {array} tags - 标签ID数组
+ * @param {string} status - 文章状态
+ * @param {boolean} is_top - 是否置顶
+ * @param {string} cover - 文章封面
+ * @returns {object} 更新后的文章
+ */
 router.put("/:id", auth, async (req, res) => {
   const {
     title,
@@ -360,22 +431,7 @@ router.put("/:id", auth, async (req, res) => {
     // 如果没有提供摘要，自动从内容中提取
     let finalSummary = summary;
     if (!finalSummary && content) {
-      // 移除Markdown标记和HTML标签，提取前150个字符作为摘要
-      const plainText = content
-        .replace(/\[.*?\]\(.*?\)/g, "") // 移除链接
-        .replace(/#{1,6}\s/g, "") // 移除标题
-        .replace(/\*\*(.*?)\*\*/g, "$1") // 移除粗体
-        .replace(/\*(.*?)\*/g, "$1") // 移除斜体
-        .replace(/`{3}[\s\S]*?`{3}/g, "") // 移除代码块
-        .replace(/`(.*?)`/g, "$1") // 移除行内代码
-        .replace(/!\[.*?\]\(.*?\)/g, "") // 移除图片
-        .replace(/<[^>]+>/g, "") // 移除HTML标签
-        .trim();
-
-      finalSummary =
-        plainText.length > 150
-          ? plainText.substring(0, 150) + "..."
-          : plainText;
+      finalSummary = extractSummary(content);
     }
 
     await article.update({
@@ -399,7 +455,12 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
-// Delete article (Admin or Owner only)
+/**
+ * 删除文章（仅管理员或文章所有者）
+ * @route DELETE /api/articles/:id
+ * @param {number} id - 文章ID
+ * @returns {object} 操作结果
+ */
 router.delete("/:id", auth, async (req, res) => {
   try {
     const article = await Article.findByPk(req.params.id);

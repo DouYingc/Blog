@@ -1,15 +1,24 @@
+/**
+ * 搜索路由
+ * 功能：处理搜索相关的API请求，包括搜索建议和文章搜索
+ */
 const express = require("express");
 const router = express.Router();
 const Article = require("../models/Article");
 const Tag = require("../models/Tag");
 const { Op } = require("sequelize");
 
-// 获取搜索建议
+/**
+ * 获取搜索建议
+ * @route GET /api/search/suggestions
+ * @param {string} keyword - 搜索关键词
+ * @returns {object} 包含文章和标签的搜索建议
+ */
 router.get("/suggestions", async (req, res) => {
   try {
     const { keyword } = req.query;
     
-    if (!keyword || keyword.length< 2) {
+    if (!keyword || keyword.length < 2) {
       return res.json({ articles: [], tags: [] });
     }
 
@@ -43,7 +52,14 @@ router.get("/suggestions", async (req, res) => {
   }
 });
 
-// 搜索文章
+/**
+ * 搜索文章
+ * @route GET /api/search/articles
+ * @param {string} keyword - 搜索关键词
+ * @param {number} page - 页码，默认1
+ * @param {number} limit - 每页数量，默认10
+ * @returns {object} 搜索结果和总数
+ */
 router.get("/articles", async (req, res) => {
   try {
     const { keyword, page = 1, limit = 10 } = req.query;
@@ -100,4 +116,5 @@ router.get("/articles", async (req, res) => {
   }
 });
 
+// 导出路由
 module.exports = router;

@@ -1,6 +1,7 @@
 <template>
   <div class="home">
     <el-container direction="vertical">
+      <!-- 导航栏组件 -->
       <nav-bar @search="handleSearch"></nav-bar>
 
       <el-main class="main">
@@ -9,6 +10,7 @@
           <div class="left-container">
             <div class="articles-grid">
               <template v-if="articles.length > 0">
+                <!-- 文章列表 -->
                 <el-card v-for="article in articles" :key="article.id" class="article-card">
                   <div class="article-item">
                     <!-- 文章封面图 -->
@@ -20,9 +22,10 @@
                       <div slot="header" class="clearfix article-header">
                         <span class="article-title" @click="viewDetail(article.id)">{{ article.title }}</span>
                         <el-tag v-if="article.is_top" size="mini" type="danger" style="margin-left: 10px">置顶</el-tag>
-
                       </div>
+                      <!-- 文章摘要 -->
                       <div class="article-summary">{{ article.summary }}</div>
+                      <!-- 文章信息 -->
                       <div class="article-footer">
                         <span class="article-info user-link"
                           @click.stop="$router.push(`/user/profile/${article.user_id}`)">
@@ -47,12 +50,14 @@
                     </div>
                   </div>
                 </el-card>
+                <!-- 分页控件 -->
                 <el-pagination layout="prev, pager, next" :total="total" :page-size="pageSize"
                   @current-change="handlePageChange" style="text-align: center; margin-top: 20px"></el-pagination>
 
                 <!-- 随机文章推荐 -->
                 <random-articles></random-articles>
               </template>
+              <!-- 空状态 -->
               <el-card v-else class="empty-card">
                 <el-empty description="该分类下暂无文章"></el-empty>
               </el-card>
@@ -61,6 +66,7 @@
 
           <!-- 右侧侧边栏 (25%) -->
           <div class="right-container">
+            <!-- 文章分类 -->
             <el-card class="sidebar-card">
               <div slot="header">文章分类</div>
               <ul class="sidebar-list">
@@ -69,7 +75,7 @@
                   @click="filterByCategory(cat.id)">{{ cat.name }}</li>
               </ul>
             </el-card>
-            <!-- 留言板侧边栏快捷入口 (论坛化增强) -->
+            <!-- 社区动态 -->
             <el-card class="sidebar-card" style="margin-top: 20px">
               <div slot="header" class="sidebar-header">
                 <span>社区动态</span>
@@ -87,8 +93,10 @@
               </div>
             </el-card>
 
+            <!-- 热门文章 -->
             <popular-articles></popular-articles>
 
+            <!-- 热门标签 -->
             <el-card class="sidebar-card" style="margin-top: 20px">
               <div slot="header">热门标签</div>
               <div class="tag-cloud">
@@ -104,10 +112,14 @@
 </template>
 
 <script>
+/**
+ * 首页组件
+ * 功能：展示文章列表、分类、标签、社区动态等内容
+ */
 import axios from '../axios'
-import NavBar from '@/components/NavBar.vue'
-import PopularArticles from '@/components/PopularArticles.vue'
-import RandomArticles from '@/components/RandomArticles.vue'
+import NavBar from '@/components/NavBar.vue' // 导航栏组件
+import PopularArticles from '@/components/PopularArticles.vue' // 热门文章组件
+import RandomArticles from '@/components/RandomArticles.vue' // 随机文章推荐组件
 
 export default {
   name: 'HomeView',
@@ -118,23 +130,29 @@ export default {
   },
   data () {
     return {
-      articles: [],
-      categories: [],
-      tags: [],
-      total: 0,
-      pageSize: 10,
-      currentPage: 1,
-      categoryId: null,
-      tagId: null,
-      keyword: '',
-      recentMessages: [],
-      currentUser: JSON.parse(localStorage.getItem('user') || '{}')
+      articles: [], // 文章列表
+      categories: [], // 分类列表
+      tags: [], // 标签列表
+      total: 0, // 总文章数
+      pageSize: 10, // 每页文章数
+      currentPage: 1, // 当前页码
+      categoryId: null, // 当前分类ID
+      tagId: null, // 当前标签ID
+      keyword: '', // 搜索关键词
+      recentMessages: [], // 最近留言
+      currentUser: JSON.parse(localStorage.getItem('user') || '{}') // 当前用户
     }
   },
   computed: {
+    /**
+     * 是否已登录
+     */
     isLoggedIn () {
       return !!localStorage.getItem('token')
     },
+    /**
+     * 是否为管理员
+     */
     isAdmin () {
       return this.currentUser.role === 'admin'
     }
@@ -142,13 +160,18 @@ export default {
   created () {
     // 重置滚动位置到顶部
     window.scrollTo(0, 0)
+    // 获取搜索关键词
     this.keyword = this.$route.query.keyword || ''
+    // 加载数据
     this.fetchArticles()
     this.fetchCategories()
     this.fetchTags()
     this.fetchRecentMessages()
   },
   watch: {
+    /**
+     * 监听搜索关键词变化
+     */
     '$route.query.keyword' (newVal) {
       this.keyword = newVal || ''
       this.currentPage = 1
@@ -156,7 +179,9 @@ export default {
     }
   },
   methods: {
-
+    /**
+     * 获取最近留言
+     */
     async fetchRecentMessages () {
       try {
         const response = await axios.get('/messages')
@@ -166,17 +191,26 @@ export default {
         this.recentMessages = []
       }
     },
+    /**
+     * 格式化日期
+     */
     formatDate (dateStr) {
       if (!dateStr || dateStr === 'undefined' || dateStr === 'null') return '未知'
       const date = new Date(dateStr)
       if (isNaN(date.getTime())) return '无效日期'
       return `${date.getMonth() + 1}-${date.getDate()}`
     },
+    /**
+     * 处理搜索
+     */
     handleSearch (keyword) {
       this.keyword = keyword
       this.currentPage = 1
       this.fetchArticles()
     },
+    /**
+     * 获取文章列表
+     */
     async fetchArticles () {
       try {
         const response = await axios.get('/articles', {
@@ -194,6 +228,9 @@ export default {
         this.$message.error('获取文章列表失败')
       }
     },
+    /**
+     * 获取分类列表
+     */
     async fetchCategories () {
       try {
         const response = await axios.get('/categories')
@@ -202,6 +239,9 @@ export default {
         this.$message.error('获取分类失败')
       }
     },
+    /**
+     * 获取标签列表
+     */
     async fetchTags () {
       try {
         const response = await axios.get('/tags')
@@ -210,25 +250,43 @@ export default {
         this.$message.error('获取标签失败')
       }
     },
+    /**
+     * 处理分页变化
+     */
     handlePageChange (page) {
       this.currentPage = page
       this.fetchArticles()
     },
+    /**
+     * 按分类筛选
+     */
     filterByCategory (id) {
       this.categoryId = id
       this.tagId = null
       this.currentPage = 1
       this.fetchArticles()
     },
+    /**
+     * 跳转到标签页面
+     */
     goToTagPage (id) {
       this.$router.push(`/tags/${id}`)
     },
+    /**
+     * 检查是否可以管理文章
+     */
     canManage (article) {
       return this.isAdmin || (article.user_id === this.currentUser.id)
     },
+    /**
+     * 编辑文章
+     */
     handleEdit (id) {
       this.$router.push(`/article/edit/${id}`)
     },
+    /**
+     * 删除文章
+     */
     async handleDelete (id) {
       try {
         await this.$confirm('确定要删除这篇文章吗？', '提示', { type: 'warning' })
@@ -241,9 +299,15 @@ export default {
         if (error !== 'cancel') this.$message.error('删除失败')
       }
     },
+    /**
+     * 查看文章详情
+     */
     viewDetail (id) {
       this.$router.push(`/article/${id}`)
     },
+    /**
+     * 获取默认封面图
+     */
     getDefaultCover () {
       const covers = [
         'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=tech%20blog%20cover%20with%20code%20and%20technology%20elements&image_size=landscape_16_9',
@@ -254,6 +318,9 @@ export default {
       ]
       return covers[Math.floor(Math.random() * covers.length)]
     },
+    /**
+     * 退出登录
+     */
     handleLogout () {
       localStorage.removeItem('token')
       localStorage.removeItem('user')

@@ -1,6 +1,7 @@
 <template>
   <div class="user-center">
     <el-container direction="vertical">
+      <!-- 导航栏 -->
       <nav-bar></nav-bar>
       <el-main class="main">
         <el-tabs v-model="activeTab" type="border-card">
@@ -162,9 +163,13 @@
 </template>
 
 <script>
-import axios from '../axios'
-import UserDashboard from '@/components/UserDashboard.vue'
-import NavBar from '@/components/NavBar.vue'
+/**
+ * 用户中心组件
+ * 功能：用户个人中心，包含数据中心、文章管理、收藏管理、关注管理和个人资料修改
+ */
+import axios from '../axios' // 网络请求
+import UserDashboard from '@/components/UserDashboard.vue' // 数据中心组件
+import NavBar from '@/components/NavBar.vue' // 导航栏组件
 
 export default {
   name: 'UserCenter',
@@ -174,33 +179,34 @@ export default {
   },
   data () {
     return {
-      activeTab: 'dashboard',
-      loading: false,
-      loadingFollowing: false,
-      loadingFollowers: false,
-      myArticles: [],
-      favoriteArticles: [],
-      followingList: [],
-      followersList: [],
-      currentUser: JSON.parse(localStorage.getItem('user') || '{}'),
+      activeTab: 'dashboard', // 当前激活的标签页
+      loading: false, // 加载状态
+      loadingFollowing: false, // 关注列表加载状态
+      loadingFollowers: false, // 粉丝列表加载状态
+      myArticles: [], // 我的文章列表
+      favoriteArticles: [], // 收藏文章列表
+      followingList: [], // 关注用户列表
+      followersList: [], // 粉丝列表
+      currentUser: JSON.parse(localStorage.getItem('user') || '{}'), // 当前用户信息
       userForm: {
-        username: '',
-        email: '',
-        avatar: '',
-        bio: '',
+        username: '', // 用户名
+        email: '', // 邮箱
+        avatar: '', // 头像
+        bio: '', // 个人简介
         social_links: {
-          github: '',
-          website: '',
-          twitter: '',
-          linkedin: ''
+          github: '', // GitHub链接
+          website: '', // 个人网站
+          twitter: '', // Twitter链接
+          linkedin: '' // LinkedIn链接
         }
       },
       uploadHeaders: {
-        Authorization: `Bearer ${localStorage.getItem('token')}`
+        Authorization: `Bearer ${localStorage.getItem('token')}` // 上传头像的认证头
       }
     }
   },
   created () {
+    // 初始化用户表单数据
     this.userForm.username = this.currentUser.username
     this.userForm.email = this.currentUser.email || ''
     this.userForm.avatar = this.currentUser.avatar || ''
@@ -211,10 +217,12 @@ export default {
       twitter: '',
       linkedin: ''
     }
+    // 加载我的文章和收藏
     this.fetchMyArticles()
     this.fetchFavorites()
   },
   watch: {
+    // 监听标签页切换，加载对应数据
     activeTab (newTab) {
       if (newTab === 'following') {
         this.fetchFollowing()
@@ -224,6 +232,9 @@ export default {
     }
   },
   methods: {
+    /**
+     * 获取我的文章
+     */
     async fetchMyArticles () {
       this.loading = true
       try {
@@ -237,6 +248,10 @@ export default {
         this.loading = false
       }
     },
+
+    /**
+     * 获取我的收藏
+     */
     async fetchFavorites () {
       try {
         const response = await axios.get('/interactions/my-favorites', {
@@ -247,6 +262,10 @@ export default {
         console.error('获取收藏失败', error)
       }
     },
+
+    /**
+     * 删除文章
+     */
     async handleDelete (id) {
       try {
         await this.$confirm('确定要删除这篇文章吗？', '提示', { type: 'warning' })
@@ -259,6 +278,10 @@ export default {
         if (error !== 'cancel') this.$message.error('删除失败')
       }
     },
+
+    /**
+     * 更新个人资料
+     */
     async updateProfile () {
       try {
         const response = await axios.put('/auth/profile', {
@@ -280,10 +303,18 @@ export default {
         this.$message.error(error.response?.data?.message || '资料更新失败')
       }
     },
+
+    /**
+     * 头像上传成功处理
+     */
     handleAvatarSuccess (res) {
       this.userForm.avatar = res.url
       this.$message.success('头像上传成功，点击保存修改生效')
     },
+
+    /**
+     * 头像上传前检查
+     */
     beforeAvatarUpload (file) {
       const isJPG = file.type === 'image/jpeg' || file.type === 'image/png'
       const isLt2M = file.size / 1024 / 1024 < 2
@@ -296,6 +327,10 @@ export default {
       }
       return isJPG && isLt2M
     },
+
+    /**
+     * 获取关注列表
+     */
     async fetchFollowing () {
       this.loadingFollowing = true
       try {
@@ -307,6 +342,10 @@ export default {
         this.loadingFollowing = false
       }
     },
+
+    /**
+     * 获取粉丝列表
+     */
     async fetchFollowers () {
       this.loadingFollowers = true
       try {
@@ -318,6 +357,10 @@ export default {
         this.loadingFollowers = false
       }
     },
+
+    /**
+     * 取消关注用户
+     */
     async unfollowUser (userId) {
       try {
         await this.$confirm('确定要取消关注该用户吗？', '提示', { type: 'warning' })
@@ -328,9 +371,17 @@ export default {
         if (error !== 'cancel') this.$message.error('取消关注失败')
       }
     },
+
+    /**
+     * 发送私信
+     */
     sendPrivateMessage (userId) {
       this.$router.push(`/messages/private/${userId}`)
     },
+
+    /**
+     * 退出登录
+     */
     handleLogout () {
       localStorage.removeItem('token')
       localStorage.removeItem('user')

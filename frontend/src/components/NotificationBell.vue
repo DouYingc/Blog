@@ -33,35 +33,67 @@
 <script>
 import axios from '../axios'
 
+/**
+ * 通知铃铛组件
+ * 功能：显示用户通知、未读消息提醒、处理通知点击事件
+ */
 export default {
   name: 'NotificationBell',
+  /**
+   * 组件数据
+   */
   data () {
     return {
-      showNotifications: false,
-      notifications: [],
-      unreadCount: 0,
-      notificationTimer: null
+      showNotifications: false, // 通知弹窗显示状态
+      notifications: [], // 通知列表
+      unreadCount: 0, // 未读通知数量
+      notificationTimer: null // 定时轮询定时器
     }
   },
+  /**
+   * 组件挂载时执行
+   */
   mounted () {
+    // 初始化获取通知列表
     this.fetchNotifications()
     // 设置定时轮询，每30秒检查一次新通知
     this.startNotificationTimer()
   },
+  /**
+   * 组件销毁前执行
+   */
   beforeDestroy () {
+    // 清除定时轮询
     if (this.notificationTimer) {
       clearInterval(this.notificationTimer)
     }
   },
+  /**
+   * 计算属性
+   */
   computed: {
+    /**
+     * 检查用户是否已登录
+     * @returns {boolean} 是否已登录
+     */
     isLoggedIn () {
       return !!localStorage.getItem('token')
     }
   },
+  /**
+   * 组件方法
+   */
   methods: {
+    /**
+     * 切换通知弹窗显示状态
+     */
     toggleNotifications () {
       this.showNotifications = !this.showNotifications
     },
+
+    /**
+     * 启动通知定时轮询
+     */
     startNotificationTimer () {
       // 每30秒检查一次新通知
       this.notificationTimer = setInterval(() => {
@@ -70,6 +102,10 @@ export default {
         }
       }, 30000)
     },
+
+    /**
+     * 检查新通知
+     */
     async checkNewNotifications () {
       try {
         // 先获取未读通知数量
@@ -87,7 +123,12 @@ export default {
         console.error('检查新通知失败:', error)
       }
     },
+
+    /**
+     * 获取通知列表
+     */
     async fetchNotifications () {
+      // 如果未登录，清空通知数据
       if (!this.isLoggedIn) {
         this.notifications = []
         this.unreadCount = 0
@@ -100,30 +141,49 @@ export default {
         this.unreadCount = this.notifications.filter(n => !n.is_read).length
       } catch (error) {
         console.error('获取通知失败:', error)
+        // 错误处理：清空通知数据
         this.notifications = []
         this.unreadCount = 0
       }
     },
+
+    /**
+     * 标记通知为已读
+     * @param {number} notificationId - 通知ID
+     */
     async markAsRead (notificationId) {
+      // 如果未登录，直接返回
       if (!this.isLoggedIn) return
 
       try {
         await axios.put(`/notifications/${notificationId}/read`)
+        // 重新获取通知列表
         this.fetchNotifications()
       } catch (error) {
         console.error('标记已读失败:', error)
       }
     },
+
+    /**
+     * 标记所有通知为已读
+     */
     async markAllAsRead () {
+      // 如果未登录，直接返回
       if (!this.isLoggedIn) return
 
       try {
         await axios.put('/notifications/read-all')
+        // 重新获取通知列表
         this.fetchNotifications()
       } catch (error) {
         console.error('全部标为已读失败:', error)
       }
     },
+
+    /**
+     * 处理通知点击事件
+     * @param {Object} notification - 通知对象
+     */
     async handleNotificationClick (notification) {
       // 先标记为已读
       await this.markAsRead(notification.id)
@@ -171,6 +231,11 @@ export default {
       // 关闭通知弹窗
       this.showNotifications = false
     },
+
+    /**
+     * 滚动到指定评论位置
+     * @param {number} commentId - 评论ID
+     */
     scrollToComment (commentId) {
       this.$nextTick(() => {
         const commentElement = document.getElementById(`comment-${commentId}`)
@@ -179,6 +244,12 @@ export default {
         }
       })
     },
+
+    /**
+     * 根据通知类型获取对应的图标
+     * @param {string} type - 通知类型
+     * @returns {string} 图标类名
+     */
     getNotificationIcon (type) {
       const iconMap = {
         comment: 'el-icon-message',
@@ -190,6 +261,12 @@ export default {
       }
       return iconMap[type] || 'el-icon-info'
     },
+
+    /**
+     * 格式化时间显示
+     * @param {string} timeString - 时间字符串
+     * @returns {string} 格式化后的时间
+     */
     formatTime (timeString) {
       const now = new Date()
       const time = new Date(timeString)
@@ -209,8 +286,7 @@ export default {
       }
     }
   }
-}
-</script>
+}</script>
 <style scoped>
 .notification-bell {
   position: relative;

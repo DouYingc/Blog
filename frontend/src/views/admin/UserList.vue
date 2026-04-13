@@ -1,31 +1,20 @@
 <template>
   <div class="user-list">
     <h2>用户管理</h2>
-    
+
     <el-card>
       <div class="filter-bar">
-        <el-input
-          v-model="searchQuery"
-          placeholder="搜索用户名"
-          class="search-input"
-          clearable
-        >
+        <el-input v-model="searchQuery" placeholder="搜索用户名" class="search-input" clearable>
           <el-button slot="append" icon="el-icon-search" @click="handleSearch"></el-button>
         </el-input>
-        
+
         <el-select v-model="roleFilter" placeholder="筛选角色" clearable>
           <el-option label="管理员" value="admin"></el-option>
           <el-option label="访客" value="visitor"></el-option>
         </el-select>
       </div>
 
-      <el-table
-        :data="userList"
-        border
-        stripe
-        style="width: 100%"
-        @selection-change="handleSelectionChange"
-      >
+      <el-table :data="userList" border stripe style="width: 100%" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55"></el-table-column>
         <el-table-column prop="id" label="ID" width="80"></el-table-column>
         <el-table-column prop="username" label="用户名" min-width="120"></el-table-column>
@@ -54,24 +43,13 @@
         </el-table-column>
         <el-table-column label="操作" width="180">
           <template slot-scope="scope">
-            <el-button
-              type="text"
-              :disabled="scope.row.role === 'admin'"
-              @click="changeRole(scope.row)"
-            >
+            <el-button type="text" :disabled="scope.row.role === 'admin'" @click="changeRole(scope.row)">
               {{ scope.row.role === 'admin' ? '管理员' : '设为管理员' }}
             </el-button>
-            <el-button
-              type="text"
-              @click="viewProfile(scope.row)"
-            >
+            <el-button type="text" @click="viewProfile(scope.row)">
               查看
             </el-button>
-            <el-button
-              type="text"
-              :disabled="scope.row.role === 'admin'"
-              @click="deleteUser(scope.row)"
-            >
+            <el-button type="text" :disabled="scope.row.role === 'admin'" @click="deleteUser(scope.row)">
               删除
             </el-button>
           </template>
@@ -79,15 +57,9 @@
       </el-table>
 
       <div class="pagination">
-        <el-pagination
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :current-page="currentPage"
-          :page-sizes="[10, 20, 50]"
-          :page-size="pageSize"
-          layout="total, sizes, prev, pager, next, jumper"
-          :total="total"
-        >
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="currentPage"
+          :page-sizes="[10, 20, 50]" :page-size="pageSize" layout="total, sizes, prev, pager, next, jumper"
+          :total="total">
         </el-pagination>
       </div>
     </el-card>
@@ -99,7 +71,7 @@ import axios from '../../axios'
 
 export default {
   name: 'UserList',
-  data() {
+  data () {
     return {
       userList: [],
       searchQuery: '',
@@ -110,11 +82,11 @@ export default {
       selectedUsers: []
     }
   },
-  mounted() {
+  mounted () {
     this.fetchUsers()
   },
   methods: {
-    async fetchUsers() {
+    async fetchUsers () {
       try {
         const response = await axios.get('/users/active', {
           params: {
@@ -130,23 +102,23 @@ export default {
         this.$message.error('获取用户列表失败')
       }
     },
-    handleSearch() {
+    handleSearch () {
       this.currentPage = 1
       this.fetchUsers()
     },
-    handleSizeChange(val) {
+    handleSizeChange (val) {
       this.pageSize = val
       this.currentPage = 1
       this.fetchUsers()
     },
-    handleCurrentChange(val) {
+    handleCurrentChange (val) {
       this.currentPage = val
       this.fetchUsers()
     },
-    handleSelectionChange(selection) {
+    handleSelectionChange (selection) {
       this.selectedUsers = selection
     },
-    formatDate(dateString) {
+    formatDate (dateString) {
       if (!dateString) return ''
       return new Date(dateString).toLocaleString('zh-CN', {
         year: 'numeric',
@@ -156,10 +128,10 @@ export default {
         minute: '2-digit'
       })
     },
-    viewProfile(user) {
+    viewProfile (user) {
       this.$router.push(`/user/${user.id}`)
     },
-    async changeRole(user) {
+    async changeRole (user) {
       try {
         const newRole = user.role === 'admin' ? 'visitor' : 'admin'
         await axios.put(`/users/${user.id}/role`, { role: newRole })
@@ -169,7 +141,7 @@ export default {
         this.$message.error('角色修改失败')
       }
     },
-    async deleteUser(user) {
+    async deleteUser (user) {
       this.$confirm('确定要删除该用户吗？', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

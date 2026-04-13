@@ -1,8 +1,10 @@
 <template>
   <div class="article-detail">
     <el-container direction="vertical">
+      <!-- 导航栏 -->
       <nav-bar></nav-bar>
 
+      <!-- 阅读进度条 -->
       <div class="reading-progress">
         <div class="reading-progress-bar" :style="{ width: readingProgress + '%' }"></div>
       </div>
@@ -12,15 +14,19 @@
           <!-- 左侧：文章内容 -->
           <div class="article-content">
             <el-card class="detail-card">
+              <!-- 错误提示 -->
               <el-alert v-if="errorMsg" :title="errorMsg" type="error" show-icon style="margin-bottom: 20px"></el-alert>
               <div slot="header">
                 <div class="title-wrapper">
+                  <!-- 文章标题 -->
                   <h1 class="title">{{ article.title }}</h1>
+                  <!-- 文章管理操作 -->
                   <div v-if="canManage" class="detail-manage">
                     <el-button type="primary" size="small" icon="el-icon-edit" @click="handleEdit">编辑文章</el-button>
                     <el-button type="danger" size="small" icon="el-icon-delete" @click="handleDelete">删除文章</el-button>
                   </div>
                 </div>
+                <!-- 文章元信息 -->
                 <div class="meta">
                   <span class="user-link" @click="$router.push(`/user/profile/${article.user_id}`)">
                     <i class="el-icon-user"></i> {{ article.User ? article.User.username : '未知' }}
@@ -30,8 +36,9 @@
                   <span><i class="el-icon-view"></i> 阅读: {{ article.views }}</span>
                 </div>
               </div>
-              <!-- 使用 v-html 渲染 Markdown 解析后的 HTML -->
+              <!-- 文章内容 -->
               <div class="content markdown-body" v-html="article.html_content"></div>
+              <!-- 文章标签 -->
               <div class="tags" v-if="article.Tags && article.Tags.length">
                 <el-tag v-for="tag in article.Tags" :key="tag.id" size="mini" style="margin-right: 5px">{{ tag.name
                   }}</el-tag>
@@ -80,8 +87,10 @@
               </div>
             </el-card>
 
+            <!-- 相关文章 -->
             <related-articles v-if="article.id" :article-id="article.id"></related-articles>
 
+            <!-- 评论区 -->
             <el-card class="comments-card" style="margin-top: 20px">
               <div slot="header" class="comment-header-title">全部评论 ({{ commentsCount }})</div>
 
@@ -204,10 +213,14 @@
 </template>
 
 <script>
-import axios from '../axios'
-import 'github-markdown-css/github-markdown.css'
-import RelatedArticles from '@/components/RelatedArticles.vue'
-import NavBar from '@/components/NavBar.vue'
+/**
+ * 文章详情页组件
+ * 功能：展示文章详情、目录、评论，支持点赞、收藏、分享等交互功能
+ */
+import axios from '../axios' // 网络请求
+import 'github-markdown-css/github-markdown.css' // Markdown样式
+import RelatedArticles from '@/components/RelatedArticles.vue' // 相关文章组件
+import NavBar from '@/components/NavBar.vue' // 导航栏组件
 
 export default {
   name: 'ArticleDetail',
@@ -217,28 +230,31 @@ export default {
   },
   data () {
     return {
-      article: {},
-      comments: [],
+      article: {}, // 文章详情数据
+      comments: [], // 评论列表
       commentForm: {
-        nickname: '',
-        email: '',
-        content: '',
-        parent_id: null
+        nickname: '', // 评论昵称
+        email: '', // 评论邮箱
+        content: '', // 评论内容
+        parent_id: null // 父评论ID（用于回复）
       },
-      currentUser: JSON.parse(localStorage.getItem('user') || '{}'),
-      isLiked: false,
-      isFavorited: false,
-      showActions: false,
-      replyPlaceholder: '写下你的评论...',
-      errorMsg: '',
-      toc: [],
+      currentUser: JSON.parse(localStorage.getItem('user') || '{}'), // 当前用户信息
+      isLiked: false, // 是否已点赞
+      isFavorited: false, // 是否已收藏
+      showActions: false, // 是否显示评论操作按钮
+      replyPlaceholder: '写下你的评论...', // 回复占位符
+      errorMsg: '', // 错误信息
+      toc: [], // 文章目录
 
-      readingProgress: 0,
-      replyForms: {},
-      commentLikes: new Set()
+      readingProgress: 0, // 阅读进度
+      replyForms: {}, // 回复表单数据
+      commentLikes: new Set() // 评论点赞状态
     }
   },
   computed: {
+    /**
+     * 主内容区域样式
+     */
     mainStyle () {
       return {
         maxWidth: '1200px',
@@ -248,16 +264,28 @@ export default {
         minHeight: 'calc(100vh - 100px)'
       }
     },
+    /**
+     * 是否已登录
+     */
     isLoggedIn () {
       return !!localStorage.getItem('token')
     },
+    /**
+     * 是否可以管理文章
+     */
     canManage () {
       if (!this.isLoggedIn || !this.article.id) return false
       return this.currentUser.role === 'admin' || (this.article.user_id === this.currentUser.id)
     },
+    /**
+     * 评论数量
+     */
     commentsCount () {
       return this.comments.length
     },
+    /**
+     * 嵌套评论结构
+     */
     nestedComments () {
       const roots = this.comments.filter(c => !c.parent_id)
       return roots.map(root => ({
@@ -293,12 +321,18 @@ export default {
     }
   },
   methods: {
+    /**
+     * 更新阅读进度
+     */
     updateReadingProgress () {
       const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
       const total = (document.documentElement.scrollHeight || 0) - (document.documentElement.clientHeight || 0)
       const progress = total > 0 ? (scrollTop / total) * 100 : 0
       this.readingProgress = Math.max(0, Math.min(100, Math.round(progress)))
     },
+    /**
+     * 构建文章目录
+     */
     buildToc () {
       // 确保有文章数据和html_content
       if (!this.article || !this.article.html_content) {
@@ -314,7 +348,6 @@ export default {
         const contentElement = document.querySelector('.content')
         if (contentElement) {
           const headings = contentElement.querySelectorAll('h1,h2,h3')
-
 
           if (headings.length === 0) {
             this.toc = []
@@ -336,15 +369,24 @@ export default {
       })
     },
 
+    /**
+     * 初始化评论表单
+     */
     initCommentForm () {
       if (this.isLoggedIn) {
         this.commentForm.nickname = this.currentUser.username
         this.commentForm.email = this.currentUser.email || ''
       }
     },
+    /**
+     * 评论输入框获得焦点
+     */
     onCommentFocus () {
       this.showActions = true
     },
+    /**
+     * 处理回复评论
+     */
     handleReply (comment, parentId = null) {
       this.commentForm.parent_id = parentId || comment.id
       this.commentForm.content = `@${comment.nickname} `
@@ -353,12 +395,18 @@ export default {
       // 滚动到输入框
       document.querySelector('.comment-form').scrollIntoView({ behavior: 'smooth' })
     },
+    /**
+     * 取消回复
+     */
     cancelReply () {
       this.commentForm.parent_id = null
       this.commentForm.content = ''
       this.replyPlaceholder = '写下你的评论...'
       this.showActions = false
     },
+    /**
+     * 获取文章详情
+     */
     async fetchArticle () {
       try {
         const id = this.$route.params.id
@@ -383,6 +431,9 @@ export default {
         this.toc = []
       }
     },
+    /**
+     * 获取交互状态
+     */
     async fetchInteractionStatus () {
       try {
         const response = await axios.get(`/interactions/status/${this.$route.params.id}`, {
@@ -394,6 +445,9 @@ export default {
         console.error('获取交互状态失败', error)
       }
     },
+    /**
+     * 处理点赞
+     */
     async handleLike () {
       try {
         const response = await axios.post('/interactions/like',
@@ -407,6 +461,9 @@ export default {
         this.$message.error('点赞失败')
       }
     },
+    /**
+     * 处理收藏
+     */
     async handleFavorite () {
       try {
         const response = await axios.post('/interactions/favorite',
@@ -420,10 +477,16 @@ export default {
         this.$message.error('收藏失败')
       }
     },
+    /**
+     * 检查评论是否已点赞
+     */
     isCommentLiked (commentId) {
       return this.commentLikes.has(commentId)
     },
 
+    /**
+     * 切换回复表单显示状态
+     */
     toggleReplyForm (comment, parentId = null) {
       // 直接更新状态，避免延迟
       comment.showReplyForm = !comment.showReplyForm
@@ -444,6 +507,9 @@ export default {
       }
     },
 
+    /**
+     * 获取回复表单数据
+     */
     getReplyForm (commentId) {
       if (!this.replyForms[commentId]) {
         // 确保回复表单对象存在
@@ -458,6 +524,9 @@ export default {
       return this.replyForms[commentId]
     },
 
+    /**
+     * 提交回复
+     */
     async submitReply (comment) {
       const replyForm = this.getReplyForm(comment.id)
       if (!replyForm.content.trim()) {
@@ -484,6 +553,9 @@ export default {
       }
     },
 
+    /**
+     * 获取评论点赞状态
+     */
     async fetchCommentLikes () {
       if (!this.isLoggedIn) return
 
@@ -505,6 +577,9 @@ export default {
       }
     },
 
+    /**
+     * 处理评论点赞
+     */
     async handleCommentLike (comment) {
       if (this.isCommentLiked(comment.id)) {
         this.$message.warning('已经点赞过了')
@@ -536,9 +611,15 @@ export default {
         this.$message.error('点赞失败')
       }
     },
+    /**
+     * 编辑文章
+     */
     handleEdit () {
       this.$router.push(`/article/edit/${this.article.id}`)
     },
+    /**
+     * 删除文章
+     */
     async handleDelete () {
       try {
         await this.$confirm('确定要删除这篇文章吗？', '提示', { type: 'warning' })
@@ -551,6 +632,9 @@ export default {
         if (error !== 'cancel') this.$message.error('删除失败')
       }
     },
+    /**
+     * 获取评论列表
+     */
     async fetchComments () {
       try {
         const id = this.$route.params.id
@@ -578,6 +662,9 @@ export default {
         console.error('获取评论失败', error)
       }
     },
+    /**
+     * 滚动到标题
+     */
     scrollToHeading (id) {
       const element = document.getElementById(id)
       if (element) {
@@ -589,6 +676,9 @@ export default {
         })
       }
     },
+    /**
+     * 提交评论
+     */
     async submitComment () {
       if (!this.commentForm.nickname || !this.commentForm.content) {
         this.$message.warning('请填写昵称和内容')
@@ -614,6 +704,9 @@ export default {
         this.$message.error('评论失败')
       }
     },
+    /**
+     * 格式化日期
+     */
     formatDate (dateStr) {
       if (!dateStr || dateStr === 'undefined' || dateStr === 'null') return '未知时间'
       const date = new Date(dateStr)
@@ -626,6 +719,9 @@ export default {
       if (isNaN(Y) || isNaN(date.getMonth()) || isNaN(date.getDate())) return '无效日期'
       return `${Y}-${M}-${D} ${h}:${m}`
     },
+    /**
+     * 处理分享
+     */
     handleShare (command) {
       const shareUrl = `${window.location.origin}/article/${this.article.id}`
       const shareTitle = this.article.title

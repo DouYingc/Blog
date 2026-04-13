@@ -1,14 +1,23 @@
+/**
+ * 统计路由
+ * 功能：处理统计相关的API请求，包括用户个人统计、综合统计、文章发布趋势和分类分布
+ */
 const express = require("express");
 const router = express.Router();
-const { adminAuth, auth } = require("../middleware/auth");
-const Article = require("../models/Article");
-const User = require("../models/User");
-const Comment = require("../models/Comment");
-const Category = require("../models/Category");
-const { sequelize } = require("../config/db");
-const { Op } = require("sequelize");
+const { adminAuth, auth } = require("../middleware/auth"); // 认证中间件
+const Article = require("../models/Article"); // 文章模型
+const User = require("../models/User"); // 用户模型
+const Comment = require("../models/Comment"); // 评论模型
+const Category = require("../models/Category"); // 分类模型
+const { sequelize } = require("../config/db"); // 数据库连接
+const { Op } = require("sequelize"); // Sequelize操作符
 
-// 获取用户个人统计数据
+/**
+ * 获取用户个人统计数据
+ * @route GET /api/stats/user-stats
+ * @description 获取当前登录用户的文章统计数据，包括文章总数、总阅读量、总获赞数、分类分布和阅读量最高的5篇文章
+ * @access 私有 (需要登录)
+ */
 router.get("/user-stats", auth, async (req, res) => {
   try {
     const userId = req.user.id;
@@ -31,7 +40,7 @@ router.get("/user-stats", auth, async (req, res) => {
 
     let totalLikes = 0;
     if (articleIds.length > 0) {
-      // 动态导入 Like 模型以避免循环依赖问题 (虽然这里不是循环依赖，但保持一致性)
+      // 动态导入 Like 模型以避免循环依赖问题
       const Like = require("../models/Like");
       totalLikes = await Like.count({
         where: {
@@ -80,7 +89,12 @@ router.get("/user-stats", auth, async (req, res) => {
   }
 });
 
-// 获取综合统计数据 (仅管理员)
+/**
+ * 获取综合统计数据
+ * @route GET /api/stats/summary
+ * @description 获取网站的综合统计数据，包括文章总数、用户总数、评论总数、分类总数和总阅读量
+ * @access 私有 (仅管理员)
+ */
 router.get("/summary", adminAuth, async (req, res) => {
   try {
     const articleCount = await Article.count();
@@ -103,9 +117,15 @@ router.get("/summary", adminAuth, async (req, res) => {
   }
 });
 
-// 获取最近 7 天的文章发布趋势
+/**
+ * 获取最近 7 天的文章发布趋势
+ * @route GET /api/stats/trend
+ * @description 获取最近7天的文章发布数量趋势
+ * @access 私有 (仅管理员)
+ */
 router.get("/trend", adminAuth, async (req, res) => {
   try {
+    // 生成最近7天的日期数组
     const last7Days = [];
     for (let i = 6; i >= 0; i--) {
       const date = new Date();
@@ -113,6 +133,7 @@ router.get("/trend", adminAuth, async (req, res) => {
       last7Days.push(date.toISOString().split("T")[0]);
     }
 
+    // 查询最近7天的文章发布数据
     const trends = await Article.findAll({
       attributes: [
         [sequelize.fn("DATE", sequelize.col("created_at")), "date"],
@@ -142,7 +163,12 @@ router.get("/trend", adminAuth, async (req, res) => {
   }
 });
 
-// 获取分类分布数据
+/**
+ * 获取分类分布数据
+ * @route GET /api/stats/categories
+ * @description 获取各个分类的文章数量分布
+ * @access 私有 (仅管理员)
+ */
 router.get("/categories", adminAuth, async (req, res) => {
   try {
     const data = await Category.findAll({

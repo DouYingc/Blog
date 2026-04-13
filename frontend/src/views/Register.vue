@@ -3,23 +3,29 @@
     <el-card class="register-card">
       <div slot="header" class="register-title">用户注册</div>
       <el-form :model="registerForm" :rules="rules" ref="registerForm" label-width="0">
+        <!-- 用户名输入框 -->
         <el-form-item prop="username">
           <el-input v-model="registerForm.username" prefix-icon="el-icon-user" placeholder="用户名"></el-input>
         </el-form-item>
+        <!-- 邮箱输入框 -->
         <el-form-item prop="email">
           <el-input v-model="registerForm.email" prefix-icon="el-icon-message" placeholder="邮箱"></el-input>
         </el-form-item>
+        <!-- 密码输入框 -->
         <el-form-item prop="password">
           <el-input v-model="registerForm.password" type="password" prefix-icon="el-icon-lock"
             placeholder="密码"></el-input>
         </el-form-item>
+        <!-- 确认密码输入框 -->
         <el-form-item prop="checkPassword">
           <el-input v-model="registerForm.checkPassword" type="password" prefix-icon="el-icon-lock"
             placeholder="确认密码"></el-input>
         </el-form-item>
+        <!-- 注册按钮 -->
         <el-form-item>
           <el-button type="primary" @click="handleRegister" class="register-button">立即注册</el-button>
         </el-form-item>
+        <!-- 底部链接 -->
         <el-form-item class="register-links">
           已有账号？<router-link to="/login" class="login-link">去登录</router-link>
         </el-form-item>
@@ -29,11 +35,21 @@
 </template>
 
 <script>
-import axios from '../axios'
+/**
+ * 注册页面组件
+ * 功能：提供用户注册表单，处理注册逻辑，包括表单验证、密码确认、API调用和错误处理
+ */
+import axios from '../axios' // 网络请求
 
 export default {
   name: 'RegisterView',
   data () {
+    /**
+     * 密码验证规则
+     * @param {object} rule - 验证规则
+     * @param {string} value - 输入值
+     * @param {function} callback - 回调函数
+     */
     const validatePass = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请输入密码'))
@@ -44,6 +60,13 @@ export default {
         callback()
       }
     }
+
+    /**
+     * 确认密码验证规则
+     * @param {object} rule - 验证规则
+     * @param {string} value - 输入值
+     * @param {function} callback - 回调函数
+     */
     const validatePass2 = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('请再次输入密码'))
@@ -53,13 +76,24 @@ export default {
         callback()
       }
     }
+
     return {
+      /**
+       * 注册表单数据
+       * @property {string} username - 用户名
+       * @property {string} password - 密码
+       * @property {string} checkPassword - 确认密码
+       * @property {string} email - 邮箱
+       */
       registerForm: {
         username: '',
         password: '',
         checkPassword: '',
         email: ''
       },
+      /**
+       * 表单验证规则
+       */
       rules: {
         username: [
           { required: true, message: '请输入用户名', trigger: 'blur' },
@@ -80,17 +114,25 @@ export default {
     }
   },
   methods: {
+    /**
+     * 处理注册逻辑
+     */
     handleRegister () {
+      // 表单验证
       this.$refs.registerForm.validate(async valid => {
         if (valid) {
           try {
+            // 调用注册API
             await axios.post('/auth/register', this.registerForm)
+            // 显示注册成功消息
             this.$message.success({
               message: '注册成功，请登录',
               duration: 1500
             })
+            // 跳转到登录页面
             this.$router.push('/login')
           } catch (error) {
+            // 显示注册失败消息
             this.$message.error(error.response.data.message || '注册失败')
           }
         } else {
@@ -103,6 +145,10 @@ export default {
 </script>
 
 <style scoped>
+/**
+ * 注册页面样式
+ * 包含渐变背景、卡片样式、输入框样式和按钮样式
+ */
 .register {
   display: flex;
   justify-content: center;

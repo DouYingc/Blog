@@ -116,8 +116,22 @@ npm install
 
 3. **配置数据库**
 - 创建 MySQL 数据库
-- 修改 `backend/.env` 文件中的数据库连接信息
-- 导入数据库表结构（执行 `schema.sql`）
+- 在 `backend` 目录下创建 `.env` 文件，配置数据库连接信息：
+  ```env
+  # 数据库配置
+  DB_HOST=localhost
+  DB_PORT=3306
+  DB_USER=root
+  DB_PASSWORD=your_password
+  DB_NAME=blog
+  
+  # JWT 配置
+  JWT_SECRET=your_jwt_secret_key
+  
+  # AI API 配置
+  DEEPSEEK_API_KEY=your_deepseek_api_key
+  ```
+- 启动后端服务时会自动创建数据库表结构
 
 4. **启动项目**
 ```bash
@@ -133,6 +147,165 @@ npm start
 5. **访问地址**
 - 前端：http://localhost:8080
 - 后端 API：http://localhost:3000
+
+## API 文档
+
+### 认证相关接口
+- `POST /api/auth/register` - 用户注册
+- `POST /api/auth/login` - 用户登录
+- `GET /api/auth/me` - 获取当前用户信息
+- `PUT /api/auth/profile` - 更新用户个人资料
+
+### 文章相关接口
+- `GET /api/articles` - 获取文章列表（支持分页和筛选）
+- `GET /api/articles/:id` - 获取文章详情
+- `POST /api/articles` - 创建文章
+- `PUT /api/articles/:id` - 更新文章
+- `DELETE /api/articles/:id` - 删除文章
+- `GET /api/articles/:id/related` - 获取相关文章
+
+### 用户相关接口
+- `GET /api/users` - 获取用户列表
+- `GET /api/users/:id` - 获取用户详情
+- `PUT /api/users/:id/role` - 更新用户角色
+- `DELETE /api/users/:id` - 删除用户
+
+### 评论相关接口
+- `GET /api/comments` - 获取评论列表
+- `POST /api/comments` - 创建评论
+- `DELETE /api/comments/:id` - 删除评论
+
+### AI 相关接口
+- `POST /api/ai/chat` - AI 对话
+- `POST /api/ai/generate-article` - 生成文章
+
+### 私信相关接口
+- `GET /api/privateMessages` - 获取私信列表
+- `POST /api/privateMessages/send` - 发送私信
+- `PUT /api/privateMessages/:id/read` - 标记私信为已读
+
+### 通知相关接口
+- `GET /api/notifications` - 获取通知列表
+- `PUT /api/notifications/:id/read` - 标记通知为已读
+
+## 部署指南
+
+### 开发环境
+- 按照上面的安装步骤启动项目
+- 前端使用 `npm run serve` 启动开发服务器
+- 后端使用 `npm start` 启动服务器
+
+### 生产环境
+
+1. **构建前端项目**
+```bash
+cd frontend
+npm run build
+```
+
+2. **部署前端**
+- 将 `frontend/dist` 目录下的文件部署到 Nginx 或 Apache 服务器
+
+3. **部署后端**
+- 使用 PM2 管理后端进程：
+  ```bash
+  cd backend
+  npm install pm2 -g
+  pm2 start index.js --name blog-backend
+  pm2 save
+  ```
+
+4. **Nginx 配置示例**
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+    
+    location / {
+        root /path/to/frontend/dist;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+    }
+    
+    location /api {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+## 测试指南
+
+### 前端测试
+```bash
+cd frontend
+npm run test
+```
+
+### 后端测试
+```bash
+cd backend
+npm run test
+```
+
+## 常见问题
+
+### 1. 数据库连接失败
+- 检查 `.env` 文件中的数据库配置
+- 确保 MySQL 服务正在运行
+- 确保数据库用户有正确的权限
+
+### 2. AI 功能无法使用
+- 检查 `DEEPSEEK_API_KEY` 是否配置正确
+- 确保网络连接正常，能够访问 DeepSeek API
+
+### 3. 401 授权错误
+- 检查 token 是否过期
+- 确保请求头中包含正确的 Authorization 头
+
+### 4. 图片上传失败
+- 确保 `backend/uploads` 目录存在且有写权限
+- 检查文件大小是否超过限制
+
+## 项目特点
+
+1. **现代化技术栈**：使用 Vue.js 2.x + Node.js + Express + MySQL，构建高效、可维护的全栈应用
+
+2. **完整的博客功能**：支持文章发布、编辑、删除、分类、标签等核心功能
+
+3. **丰富的社交互动**：实现了评论、点赞、收藏、关注、私信等社交功能
+
+4. **AI 智能助手**：集成 DeepSeek API，提供智能对话和文章生成功能
+
+5. **响应式设计**：适配各种设备，提供良好的用户体验
+
+6. **安全可靠**：使用 JWT 认证、密码加密、权限控制等安全措施
+
+7. **易于部署**：提供详细的部署指南，支持开发环境和生产环境
+
+8. **代码质量**：遵循代码规范，添加详细注释，确保代码可维护性
+
+## 技术亮点
+
+1. **流式 AI 响应**：实现了 AI 对话的流式输出，提供实时交互体验
+
+2. **代码高亮与复制**：自动识别代码并添加语法高亮和复制按钮
+
+3. **实时消息通知**：使用 WebSocket 实现实时消息推送
+
+4. **智能推荐系统**：基于文章标签和用户行为推荐相关内容
+
+5. **数据可视化**：在管理后台提供数据统计和可视化图表
+
+6. **模块化设计**：前端组件化开发，后端模块化架构，提高代码复用性
+
+7. **错误处理机制**：完善的错误处理和日志记录，提高系统稳定性
+
+8. **性能优化**：图片懒加载、分页加载、缓存策略等性能优化措施
 
 ## 功能演示
 

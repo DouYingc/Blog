@@ -1,9 +1,17 @@
+/**
+ * 分类管理路由
+ * 功能：处理分类的CRUD操作，支持树形结构和扁平结构的分类获取
+ */
 const express = require("express");
 const router = express.Router();
 const Category = require("../models/Category");
 const { adminAuth } = require("../middleware/auth");
 
-// 获取所有分类（树形结构）
+/**
+ * 获取所有分类（树形结构）
+ * @route GET /api/categories
+ * @returns {array} 分类树形结构
+ */
 router.get("/", async (req, res) => {
   try {
     const categories = await Category.findAll({
@@ -33,7 +41,11 @@ router.get("/", async (req, res) => {
   }
 });
 
-// 获取所有分类（扁平结构）
+/**
+ * 获取所有分类（扁平结构）
+ * @route GET /api/categories/flat
+ * @returns {array} 分类扁平列表
+ */
 router.get("/flat", async (req, res) => {
   try {
     const categories = await Category.findAll({
@@ -48,7 +60,14 @@ router.get("/flat", async (req, res) => {
   }
 });
 
-// 创建分类 (仅管理员)
+/**
+ * 创建分类 (仅管理员)
+ * @route POST /api/categories
+ * @param {string} name - 分类名称
+ * @param {string} description - 分类描述
+ * @param {number} parent_id - 父分类ID
+ * @returns {object} 创建的分类
+ */
 router.post("/", adminAuth, async (req, res) => {
   const { name, description, parent_id } = req.body;
   try {
@@ -75,7 +94,15 @@ router.post("/", adminAuth, async (req, res) => {
   }
 });
 
-// 更新分类 (仅管理员)
+/**
+ * 更新分类 (仅管理员)
+ * @route PUT /api/categories/:id
+ * @param {number} id - 分类ID
+ * @param {string} name - 分类名称
+ * @param {string} description - 分类描述
+ * @param {number} parent_id - 父分类ID
+ * @returns {object} 更新后的分类
+ */
 router.put("/:id", adminAuth, async (req, res) => {
   const { name, description, parent_id } = req.body;
   try {
@@ -112,7 +139,12 @@ router.put("/:id", adminAuth, async (req, res) => {
   }
 });
 
-// 删除分类 (仅管理员)
+/**
+ * 删除分类 (仅管理员)
+ * @route DELETE /api/categories/:id
+ * @param {number} id - 分类ID
+ * @returns {object} 操作结果
+ */
 router.delete("/:id", adminAuth, async (req, res) => {
   try {
     const category = await Category.findByPk(req.params.id);
@@ -133,4 +165,5 @@ router.delete("/:id", adminAuth, async (req, res) => {
   }
 });
 
+// 导出路由
 module.exports = router;

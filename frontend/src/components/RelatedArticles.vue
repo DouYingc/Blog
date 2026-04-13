@@ -24,11 +24,20 @@
 </template>
 
 <script>
-import axios from '../axios'
+/**
+ * 相关文章组件
+ * 功能：根据当前文章ID获取并展示相关文章列表
+ */
+import axios from '../axios' // 网络请求
 
 export default {
   name: 'RelatedArticles',
   props: {
+    /**
+     * 文章ID
+     * @type {Number}
+     * @required
+     */
     articleId: {
       type: Number,
       required: true
@@ -36,19 +45,25 @@ export default {
   },
   data () {
     return {
-      articles: [],
-      loading: false
+      articles: [], // 相关文章列表
+      loading: false // 加载状态
     }
   },
   watch: {
+    /**
+     * 监听文章ID变化，重新获取相关文章
+     */
     articleId: {
       handler () {
         this.fetchRelatedArticles()
       },
-      immediate: true
+      immediate: true // 立即执行
     }
   },
   methods: {
+    /**
+     * 获取相关文章
+     */
     async fetchRelatedArticles () {
       if (!this.articleId) return
 
@@ -62,6 +77,11 @@ export default {
         this.loading = false
       }
     },
+    /**
+     * 格式化日期
+     * @param {string} dateString - 日期字符串
+     * @returns {string} 格式化后的日期
+     */
     formatDate (dateString) {
       const date = new Date(dateString)
       return date.toLocaleDateString('zh-CN', {
@@ -75,6 +95,9 @@ export default {
 </script>
 
 <style scoped>
+/**
+ * 相关文章组件样式
+ */
 .related-articles {
   margin-top: 40px;
   padding: 20px;

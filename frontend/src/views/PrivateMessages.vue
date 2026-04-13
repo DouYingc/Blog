@@ -64,8 +64,12 @@
 </template>
 
 <script>
-import axios from '../axios'
-import NavBar from '@/components/NavBar.vue'
+/**
+ * 私信页面组件
+ * 功能：实现用户之间的私信聊天功能，包括对话列表、消息展示和发送
+ */
+import axios from '../axios' // 网络请求
+import NavBar from '@/components/NavBar.vue' // 导航栏组件
 
 export default {
   name: 'PrivateMessages',
@@ -74,17 +78,19 @@ export default {
   },
   data () {
     return {
-      conversations: [],
-      messages: [],
-      activeConversation: null,
-      activeConversationId: null,
-      messageText: '',
-      loading: false,
-      currentUserId: null
+      conversations: [], // 对话列表
+      messages: [], // 消息列表
+      activeConversation: null, // 当前激活的对话
+      activeConversationId: null, // 当前激活的对话ID
+      messageText: '', // 消息输入框内容
+      loading: false, // 加载状态
+      currentUserId: null // 当前用户ID
     }
   },
   created () {
+    // 获取当前用户ID
     this.getCurrentUserId()
+    // 获取对话列表
     this.fetchConversations()
 
     // 如果URL中有用户ID，自动选择该对话
@@ -94,6 +100,9 @@ export default {
     }
   },
   methods: {
+    /**
+     * 获取当前用户ID
+     */
     getCurrentUserId () {
       try {
         const userInfoStr = localStorage.getItem('userInfo')
@@ -116,6 +125,9 @@ export default {
         console.error('解析用户信息失败:', error)
       }
     },
+    /**
+     * 获取对话列表
+     */
     async fetchConversations () {
       try {
         const response = await axios.get('/privateMessages/conversations')
@@ -124,6 +136,10 @@ export default {
         this.$message.error('获取对话列表失败')
       }
     },
+    /**
+     * 选择对话
+     * @param {object} conversation - 对话对象
+     */
     async selectConversation (conversation) {
       this.activeConversation = conversation
       this.activeConversationId = conversation.id
@@ -141,6 +157,10 @@ export default {
         console.error('标记消息已读失败:', error)
       }
     },
+    /**
+     * 根据用户ID选择对话
+     * @param {number} userId - 用户ID
+     */
     async selectConversationById (userId) {
       const conversation = this.conversations.find(c => c.id === userId)
       if (conversation) {
@@ -162,6 +182,10 @@ export default {
         await this.fetchMessages(userId)
       }
     },
+    /**
+     * 获取消息列表
+     * @param {number} userId - 用户ID
+     */
     async fetchMessages (userId) {
       this.loading = true
       try {
@@ -185,6 +209,9 @@ export default {
         this.loading = false
       }
     },
+    /**
+     * 发送消息
+     */
     async sendMessage () {
       if (!this.messageText.trim() || !this.activeConversationId) return
 
@@ -205,6 +232,11 @@ export default {
         this.messageText = content
       }
     },
+    /**
+     * 格式化时间
+     * @param {string} time - 时间字符串
+     * @returns {string} 格式化后的时间
+     */
     formatTime (time) {
       const date = new Date(time)
       const now = new Date()
@@ -225,6 +257,9 @@ export default {
         })
       }
     },
+    /**
+     * 滚动到消息列表底部
+     */
     scrollToBottom () {
       const messagesList = this.$refs.messagesList
       if (messagesList) {
@@ -236,6 +271,9 @@ export default {
 </script>
 
 <style scoped>
+/**
+ * 私信页面样式
+ */
 .private-messages {
   height: 100vh;
   display: flex;

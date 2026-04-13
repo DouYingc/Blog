@@ -1,3 +1,7 @@
+/**
+ * 评论管理路由
+ * 功能：处理评论的CRUD操作，支持评论点赞和通知
+ */
 const express = require("express");
 const router = express.Router();
 const Comment = require("../models/Comment");
@@ -9,7 +13,12 @@ const jwt = require("jsonwebtoken");
 const NotificationService = require("../services/notificationService");
 require("dotenv").config();
 
-// 获取文章的所有评论 (公开)
+/**
+ * 获取文章的所有评论 (公开)
+ * @route GET /api/comments/article/:articleId
+ * @param {number} articleId - 文章ID
+ * @returns {array} 评论列表
+ */
 router.get("/article/:articleId", async (req, res) => {
   try {
     const comments = await Comment.findAll({
@@ -23,7 +32,11 @@ router.get("/article/:articleId", async (req, res) => {
   }
 });
 
-// 获取用户点赞的评论列表 (需要登录)
+/**
+ * 获取用户点赞的评论列表 (需要登录)
+ * @route GET /api/comments/likes
+ * @returns {object} 点赞评论ID列表
+ */
 router.get("/likes", auth, async (req, res) => {
   try {
     const likes = await CommentLike.findAll({
@@ -37,7 +50,12 @@ router.get("/likes", auth, async (req, res) => {
   }
 });
 
-// 获取单个评论的点赞状态 (需要登录)
+/**
+ * 获取单个评论的点赞状态 (需要登录)
+ * @route GET /api/comments/likes/:id
+ * @param {number} id - 评论ID
+ * @returns {object} 点赞状态
+ */
 router.get("/likes/:id", auth, async (req, res) => {
   try {
     const { id } = req.params;
@@ -53,7 +71,12 @@ router.get("/likes/:id", auth, async (req, res) => {
   }
 });
 
-// 获取单个评论 (公开)
+/**
+ * 获取单个评论 (公开)
+ * @route GET /api/comments/:id
+ * @param {number} id - 评论ID
+ * @returns {object} 评论详情
+ */
 router.get("/:id", async (req, res) => {
   try {
     const comment = await Comment.findByPk(req.params.id);
@@ -66,7 +89,16 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// 发布评论 (公开)
+/**
+ * 发布评论 (公开)
+ * @route POST /api/comments
+ * @param {number} article_id - 文章ID
+ * @param {string} nickname - 昵称
+ * @param {string} email - 邮箱
+ * @param {string} content - 评论内容
+ * @param {number} parent_id - 父评论ID
+ * @returns {object} 创建的评论
+ */
 router.post("/", async (req, res) => {
   const { article_id, nickname, email, content, parent_id } = req.body;
 
@@ -145,7 +177,11 @@ router.post("/", async (req, res) => {
   }
 });
 
-// 获取所有评论 (仅管理员)
+/**
+ * 获取所有评论 (仅管理员)
+ * @route GET /api/comments
+ * @returns {array} 评论列表
+ */
 router.get("/", adminAuth, async (req, res) => {
   try {
     const comments = await Comment.findAll({
@@ -158,7 +194,12 @@ router.get("/", adminAuth, async (req, res) => {
   }
 });
 
-// 删除评论 (管理员或文章作者可删除评论逻辑可以更复杂，目前设定仅管理员)
+/**
+ * 删除评论 (仅管理员)
+ * @route DELETE /api/comments/:id
+ * @param {number} id - 评论ID
+ * @returns {object} 操作结果
+ */
 router.delete("/:id", adminAuth, async (req, res) => {
   try {
     const comment = await Comment.findByPk(req.params.id);
@@ -172,7 +213,12 @@ router.delete("/:id", adminAuth, async (req, res) => {
   }
 });
 
-// 点赞评论 (需要登录)
+/**
+ * 点赞评论 (需要登录)
+ * @route POST /api/comments/:id/like
+ * @param {number} id - 评论ID
+ * @returns {object} 操作结果和最新点赞数
+ */
 router.post("/:id/like", auth, async (req, res) => {
   try {
     const comment = await Comment.findByPk(req.params.id);
@@ -221,4 +267,5 @@ router.post("/:id/like", auth, async (req, res) => {
   }
 });
 
+// 导出路由
 module.exports = router;

@@ -1,11 +1,22 @@
+/**
+ * 私信路由
+ * 功能：处理私信相关的API请求，包括发送私信、获取对话列表、标记已读等
+ */
 const express = require("express");
 const router = express.Router();
-const PrivateMessage = require("../models/PrivateMessage");
-const User = require("../models/User");
-const { auth } = require("../middleware/auth");
-const NotificationService = require("../services/notificationService");
+const PrivateMessage = require("../models/PrivateMessage"); // 私信模型
+const User = require("../models/User"); // 用户模型
+const { auth } = require("../middleware/auth"); // 认证中间件
+const NotificationService = require("../services/notificationService"); // 通知服务
 
-// 发送私信
+/**
+ * 发送私信
+ * @route POST /api/privateMessages/send
+ * @description 向指定用户发送私信
+ * @access 私有 (需要登录)
+ * @param {number} receiver_id - 接收者ID
+ * @param {string} content - 私信内容
+ */
 router.post("/send", auth, async (req, res) => {
   try {
     const { receiver_id, content } = req.body;
@@ -48,7 +59,15 @@ router.post("/send", auth, async (req, res) => {
   }
 });
 
-// 获取私信列表（与特定用户的对话）
+/**
+ * 获取私信列表（与特定用户的对话）
+ * @route GET /api/privateMessages/conversation/:userId
+ * @description 获取与指定用户的私信列表
+ * @access 私有 (需要登录)
+ * @param {number} userId - 用户ID
+ * @param {number} page - 页码，默认1
+ * @param {number} limit - 每页数量，默认20
+ */
 router.get("/conversation/:userId", auth, async (req, res) => {
   try {
     const { userId } = req.params;
@@ -100,7 +119,12 @@ router.get("/conversation/:userId", auth, async (req, res) => {
   }
 });
 
-// 获取私信会话列表（所有有过私信的用户）
+/**
+ * 获取私信会话列表（所有有过私信的用户）
+ * @route GET /api/privateMessages/conversations
+ * @description 获取所有有过私信的用户列表
+ * @access 私有 (需要登录)
+ */
 router.get("/conversations", auth, async (req, res) => {
   try {
     // 获取所有与当前用户有私信的用户ID
@@ -175,7 +199,12 @@ router.get("/conversations", auth, async (req, res) => {
   }
 });
 
-// 获取未读私信数量
+/**
+ * 获取未读私信数量
+ * @route GET /api/privateMessages/unread-count
+ * @description 获取当前用户的未读私信数量
+ * @access 私有 (需要登录)
+ */
 router.get("/unread-count", auth, async (req, res) => {
   try {
     const count = await PrivateMessage.count({
@@ -193,7 +222,13 @@ router.get("/unread-count", auth, async (req, res) => {
   }
 });
 
-// 标记私信为已读
+/**
+ * 标记私信为已读
+ * @route PATCH /api/privateMessages/mark-read/:messageId
+ * @description 标记指定私信为已读
+ * @access 私有 (需要登录)
+ * @param {number} messageId - 私信ID
+ */
 router.patch("/mark-read/:messageId", auth, async (req, res) => {
   try {
     const { messageId } = req.params;
@@ -219,7 +254,13 @@ router.patch("/mark-read/:messageId", auth, async (req, res) => {
   }
 });
 
-// 批量标记某个用户的所有未读消息为已读
+/**
+ * 批量标记某个用户的所有未读消息为已读
+ * @route PATCH /api/privateMessages/mark-all-read/:userId
+ * @description 标记指定用户的所有未读消息为已读
+ * @access 私有 (需要登录)
+ * @param {number} userId - 用户ID
+ */
 router.patch("/mark-all-read/:userId", auth, async (req, res) => {
   try {
     const { userId } = req.params;

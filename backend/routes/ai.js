@@ -1,3 +1,7 @@
+/**
+ * AI路由
+ * 功能：处理AI相关的API请求，包括AI对话、文章生成和模型信息获取
+ */
 const express = require("express");
 const router = express.Router();
 const axios = require("axios");
@@ -16,7 +20,8 @@ if (!DEEPSEEK_API_KEY) {
 /**
  * 调用DeepSeek API
  * @param {Array} messages - 对话消息数组
- * @returns {Promise<string>} - AI回复内容
+ * @param {boolean} stream - 是否使用流式响应
+ * @returns {Promise<string|ReadableStream>} - AI回复内容或流数据
  */
 async function callDeepSeekAPI(messages, stream = false) {
   if (!DEEPSEEK_API_KEY) {
@@ -85,7 +90,13 @@ async function callDeepSeekAPI(messages, stream = false) {
   }
 }
 
-// AI对话接口（支持流式输出）
+/**
+ * AI对话接口（支持流式输出）
+ * @route POST /api/ai/chat
+ * @description 与AI进行对话，支持流式响应
+ * @access 公共
+ * @param {string} message - 对话内容
+ */
 router.post("/chat", async (req, res) => {
   try {
     const { message } = req.body;
@@ -166,7 +177,16 @@ router.post("/chat", async (req, res) => {
   }
 });
 
-// 文章生成接口
+/**
+ * 文章生成接口
+ * @route POST /api/ai/generate-article
+ * @description 根据用户需求生成技术文章
+ * @access 公共
+ * @param {string} topic - 文章主题
+ * @param {string} type - 文章类型
+ * @param {string} length - 文章长度
+ * @param {string} requirement - 详细要求
+ */
 router.post("/generate-article", async (req, res) => {
   try {
     const { topic, type, length, requirement } = req.body;
@@ -246,7 +266,12 @@ router.post("/generate-article", async (req, res) => {
   }
 });
 
-// 获取AI模型信息
+/**
+ * 获取AI模型信息
+ * @route GET /api/ai/models
+ * @description 获取可用的AI模型信息
+ * @access 公共
+ */
 router.get("/models", (req, res) => {
   res.json({
     models: [

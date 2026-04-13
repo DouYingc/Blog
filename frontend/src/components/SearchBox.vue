@@ -1,6 +1,7 @@
 <template>
   <div class="search-box">
     <div class="search-input-wrapper">
+      <!-- 搜索输入框 -->
       <el-autocomplete v-model="searchKeyword" :fetch-suggestions="fetchSuggestions" placeholder="搜索文章..."
         :trigger-on-focus="false" @select="handleSelect" @keyup.enter.native="handleSearch" class="search-input"
         prefix-icon="el-icon-search" clearable>
@@ -12,6 +13,7 @@
         </template>
       </el-autocomplete>
 
+      <!-- 搜索按钮 -->
       <el-button type="primary" icon="el-icon-search" @click="handleSearch" class="search-button">搜索</el-button>
     </div>
 
@@ -22,6 +24,7 @@
         <div class="search-stats">找到 {{ searchTotal }} 条关于 "{{ searchedKeyword }}" 的结果</div>
 
         <div class="search-results">
+          <!-- 搜索结果项 -->
           <div v-for="article in searchResults" :key="article.id" class="search-result-item"
             @click="goToArticle(article.id)">
             <h4 class="result-title" v-html="article.title_highlight || article.title"></h4>
@@ -35,34 +38,42 @@
           </div>
         </div>
 
+        <!-- 分页控件 -->
         <el-pagination v-if="searchTotal > searchPageSize" layout="prev, pager, next" :total="searchTotal"
           :page-size="searchPageSize" :current-page="searchPage" @current-change="handlePageChange"
           style="text-align: center; margin-top: 20px"></el-pagination>
       </div>
 
+      <!-- 空状态 -->
       <el-empty v-else description="未找到相关文章"></el-empty>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import axios from '../axios'
+/**
+ * 搜索框组件
+ * 功能：提供文章搜索功能，包括搜索建议和搜索结果展示
+ */
+import axios from '../axios' // 网络请求
 
 export default {
   name: 'SearchBox',
   data () {
     return {
-      searchKeyword: '',
-      searchedKeyword: '',
-      searchDialogVisible: false,
-      searchResults: [],
-      searchTotal: 0,
-      searchPage: 1,
-      searchPageSize: 10
+      searchKeyword: '', // 搜索关键词
+      searchedKeyword: '', // 已搜索的关键词
+      searchDialogVisible: false, // 搜索结果对话框是否可见
+      searchResults: [], // 搜索结果
+      searchTotal: 0, // 搜索结果总数
+      searchPage: 1, // 当前搜索页码
+      searchPageSize: 10 // 每页搜索结果数量
     }
   },
   methods: {
-    // 获取搜索建议
+    /**
+     * 获取搜索建议
+     */
     async fetchSuggestions (queryString, cb) {
       if (queryString.length < 2) {
         cb([])
@@ -81,7 +92,9 @@ export default {
       }
     },
 
-    // 选择建议项
+    /**
+     * 选择建议项
+     */
     handleSelect (item) {
       if (item.type === 'article') {
         this.$router.push(`/article/${item.id}`)
@@ -91,7 +104,9 @@ export default {
       this.searchKeyword = ''
     },
 
-    // 执行搜索
+    /**
+     * 执行搜索
+     */
     async handleSearch () {
       if (!this.searchKeyword.trim()) {
         this.$message.warning('请输入搜索关键词')
@@ -107,7 +122,9 @@ export default {
       })
     },
 
-    // 执行搜索请求
+    /**
+     * 执行搜索请求
+     */
     async performSearch () {
       try {
         const response = await axios.get(`/search/articles`, {
@@ -126,20 +143,26 @@ export default {
       }
     },
 
-    // 分页切换
+    /**
+     * 分页切换
+     */
     handlePageChange (page) {
       this.searchPage = page
       this.performSearch()
     },
 
-    // 跳转到文章详情
+    /**
+     * 跳转到文章详情
+     */
     goToArticle (id) {
       this.searchDialogVisible = false
       this.searchKeyword = ''
       this.$router.push(`/article/${id}`)
     },
 
-    // 格式化日期
+    /**
+     * 格式化日期
+     */
     formatDate (dateStr) {
       if (!dateStr) return ''
       const date = new Date(dateStr)
@@ -150,6 +173,7 @@ export default {
 </script>
 
 <style scoped>
+/* 搜索框容器 */
 .search-box {
   display: flex;
   flex-direction: column;
@@ -158,6 +182,7 @@ export default {
   padding: 8px 0 8px 0;
 }
 
+/* 搜索输入区域 */
 .search-input-wrapper {
   display: flex;
   align-items: center;
@@ -165,11 +190,13 @@ export default {
   width: 100%;
 }
 
+/* 搜索输入框 */
 .search-input {
   flex: 1;
   min-width: 0;
 }
 
+/* 搜索按钮 */
 .search-button {
   white-space: nowrap;
   padding: 0 16px;
@@ -177,6 +204,7 @@ export default {
   font-size: 14px;
 }
 
+/* 搜索建议项 */
 .suggestion-item {
   display: flex;
   align-items: center;
@@ -188,6 +216,7 @@ export default {
   color: #909399;
 }
 
+/* 搜索统计信息 */
 .search-stats {
   color: #909399;
   font-size: 14px;
@@ -196,6 +225,7 @@ export default {
   border-bottom: 1px solid #ebeef5;
 }
 
+/* 搜索结果项 */
 .search-result-item {
   padding: 15px;
   border-bottom: 1px solid #ebeef5;
@@ -207,6 +237,7 @@ export default {
   background-color: #f5f7fa;
 }
 
+/* 搜索结果标题 */
 .result-title {
   margin: 0 0 8px 0;
   color: #409eff;
@@ -219,6 +250,7 @@ export default {
   padding: 0 2px;
 }
 
+/* 搜索结果摘要 */
 .result-summary {
   margin: 0 0 10px 0;
   color: #606266;
@@ -232,6 +264,7 @@ export default {
   padding: 0 2px;
 }
 
+/* 搜索结果元信息 */
 .result-meta {
   display: flex;
   gap: 15px;

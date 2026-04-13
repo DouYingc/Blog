@@ -1,9 +1,12 @@
 <template>
+  <!-- AI助手组件 -->
   <el-container class="ai-assistant">
+    <!-- 头部导航 -->
     <el-header class="ai-header">
       <div class="header-content">
         <div class="logo" @click="goToHome">AI助手</div>
         <div class="nav-right">
+          <!-- 导航菜单 -->
           <el-menu mode="horizontal" router :default-active="$route.path" class="nav-menu">
             <el-menu-item index="/">首页</el-menu-item>
             <el-menu-item index="/ai-assistant">AI助手</el-menu-item>
@@ -11,6 +14,7 @@
             <el-menu-item index="/archives">归档</el-menu-item>
             <el-menu-item index="/messages">留言板</el-menu-item>
           </el-menu>
+          <!-- 用户菜单 -->
           <div v-if="isLoggedIn" class="user-menu-container">
             <div class="user-nav" @click="toggleUserMenu">
               <el-avatar v-if="currentUser.avatar" :size="30" :src="currentUser.avatar"
@@ -29,9 +33,10 @@
       </div>
     </el-header>
 
+    <!-- 主内容区域 -->
     <el-main class="ai-main">
       <div class="ai-container">
-        <!-- 功能切换 -->
+        <!-- 功能切换标签页 -->
         <div class="ai-tabs">
           <el-tabs v-model="activeTab" @tab-click="handleTabClick">
             <el-tab-pane label="AI对话" name="chat"></el-tab-pane>
@@ -42,6 +47,7 @@
 
         <!-- AI对话界面 -->
         <div v-show="activeTab === 'chat'" class="chat-container">
+          <!-- 聊天消息列表 -->
           <div class="chat-messages" ref="chatMessages">
             <div v-for="(message, index) in chatMessages" :key="index" :class="['message', message.role]">
               <div class="message-content"
@@ -51,6 +57,7 @@
             </div>
           </div>
 
+          <!-- 聊天输入区域 -->
           <div class="chat-input">
             <el-input v-model="chatInput" type="textarea" :rows="3" placeholder="请输入您的问题..."
               @keyup.enter.native="handleChatSend"></el-input>
@@ -62,6 +69,7 @@
 
         <!-- 文章生成界面 -->
         <div v-show="activeTab === 'article'" class="article-container">
+          <!-- 文章生成表单 -->
           <el-form :model="articleForm" label-width="100px">
             <el-form-item label="文章主题">
               <el-input v-model="articleForm.topic" placeholder="请输入文章主题"></el-input>
@@ -88,12 +96,14 @@
             </el-form-item>
           </el-form>
 
+          <!-- 文章生成按钮 -->
           <div class="article-actions">
             <el-button type="primary" @click="generateArticle" :loading="articleLoading">
               生成文章
             </el-button>
           </div>
 
+          <!-- 生成的文章展示 -->
           <div v-if="generatedArticle" class="generated-article">
             <h3>生成的文章</h3>
             <div v-html="renderedArticle"></div>
@@ -106,6 +116,7 @@
 
         <!-- 提示词库界面 -->
         <div v-show="activeTab === 'prompts'" class="prompts-container">
+          <!-- 提示词分类 -->
           <div class="prompt-categories">
             <el-button v-for="category in promptCategories" :key="category"
               :type="selectedCategory === category ? 'primary' : 'default'" @click="selectedCategory = category">
@@ -113,6 +124,7 @@
             </el-button>
           </div>
 
+          <!-- 提示词列表 -->
           <div class="prompt-list">
             <el-card v-for="prompt in filteredPrompts" :key="prompt.id" class="prompt-card" @click="usePrompt(prompt)">
               <div class="prompt-title">{{ prompt.title }}</div>
@@ -126,31 +138,35 @@
 </template>
 
 <script>
-import axios from '../axios'
-import MarkdownIt from 'markdown-it'
-import hljs from 'highlight.js'
-import 'highlight.js/styles/github.css'
+/**
+ * AI助手组件
+ * 功能：提供AI对话、文章生成和提示词库功能
+ */
+import axios from '../axios' // 网络请求
+import MarkdownIt from 'markdown-it' // Markdown渲染
+import hljs from 'highlight.js' // 代码高亮
+import 'highlight.js/styles/github.css' // 代码高亮样式
 
 export default {
   name: 'AIAssistant',
   data () {
     return {
-      activeTab: 'chat',
-      chatMessages: [],
-      chatInput: '',
-      chatLoading: false,
-      chatAbortController: null,
+      activeTab: 'chat', // 当前激活的标签页
+      chatMessages: [], // 聊天消息列表
+      chatInput: '', // 聊天输入内容
+      chatLoading: false, // 聊天加载状态
+      chatAbortController: null, // 用于取消流式请求
       articleForm: {
-        topic: '',
-        type: 'tutorial',
-        length: 'medium',
-        requirement: ''
+        topic: '', // 文章主题
+        type: 'tutorial', // 文章类型
+        length: 'medium', // 文章长度
+        requirement: '' // 详细要求
       },
-      articleLoading: false,
-      generatedArticle: '',
-      selectedCategory: '技术',
-      promptCategories: ['技术', '写作', '学习', '创意'],
-      prompts: [
+      articleLoading: false, // 文章生成加载状态
+      generatedArticle: '', // 生成的文章
+      selectedCategory: '技术', // 当前选中的提示词分类
+      promptCategories: ['技术', '写作', '学习', '创意'], // 提示词分类列表
+      prompts: [ // 提示词列表
         {
           id: 1,
           title: 'Python爬虫教程',
@@ -176,11 +192,11 @@ export default {
           category: '学习'
         }
       ],
-      isLoggedIn: false,
-      currentUser: {},
-      isAdmin: false,
-      userMenuVisible: false,
-      md: new MarkdownIt({
+      isLoggedIn: false, // 是否登录
+      currentUser: {}, // 当前用户信息
+      isAdmin: false, // 是否为管理员
+      userMenuVisible: false, // 用户菜单是否可见
+      md: new MarkdownIt({ // Markdown渲染配置
         html: true,
         linkify: true,
         typographer: true,
@@ -198,16 +214,24 @@ export default {
     }
   },
   computed: {
+    /**
+     * 过滤当前分类的提示词
+     */
     filteredPrompts () {
       return this.prompts.filter(prompt => prompt.category === this.selectedCategory)
     },
+    /**
+     * 渲染生成的文章
+     */
     renderedArticle () {
       if (!this.generatedArticle) return ''
       return this.md.render(this.generatedArticle)
     }
   },
   created () {
+    // 检查登录状态
     this.checkLoginStatus()
+    // 加载聊天历史
     this.loadChatHistory()
   },
   mounted () {
@@ -217,6 +241,9 @@ export default {
     })
   },
   methods: {
+    /**
+     * 检查登录状态
+     */
     checkLoginStatus () {
       const user = localStorage.getItem('user')
       if (user) {
@@ -225,6 +252,9 @@ export default {
         this.isAdmin = this.currentUser.role === 'admin'
       }
     },
+    /**
+     * 加载聊天历史
+     */
     loadChatHistory () {
       // 根据当前用户生成唯一的聊天历史key
       const userKey = this.isLoggedIn ? `aiChatHistory_${this.currentUser.username}` : 'aiChatHistory'
@@ -244,11 +274,17 @@ export default {
       }
       this.addCopyButtons()
     },
+    /**
+     * 保存聊天历史
+     */
     saveChatHistory () {
       // 根据当前用户生成唯一的聊天历史key
       const userKey = this.isLoggedIn ? `aiChatHistory_${this.currentUser.username}` : 'aiChatHistory'
       localStorage.setItem(userKey, JSON.stringify(this.chatMessages))
     },
+    /**
+     * 取消聊天请求
+     */
     handleChatCancel () {
       if (this.chatAbortController) {
         this.chatAbortController.abort()
@@ -256,6 +292,9 @@ export default {
         this.chatLoading = false
       }
     },
+    /**
+     * 添加代码复制按钮
+     */
     addCopyButtons () {
       this.$nextTick(() => {
         document.querySelectorAll('.message-content pre, .generated-article pre').forEach(pre => {
@@ -300,9 +339,15 @@ export default {
         })
       })
     },
+    /**
+     * 处理标签页点击
+     */
     handleTabClick (tab) {
       this.activeTab = tab.name
     },
+    /**
+     * 处理聊天发送
+     */
     async handleChatSend () {
       // 如果正在加载中，点击则取消请求
       if (this.chatLoading) {
@@ -433,6 +478,9 @@ export default {
         this.chatLoading = false
       }
     },
+    /**
+     * 生成文章
+     */
     async generateArticle () {
       if (!this.articleForm.topic.trim()) {
         this.$message.warning('请输入文章主题')
@@ -451,6 +499,9 @@ export default {
         this.addCopyButtons()
       }
     },
+    /**
+     * 使用提示词
+     */
     usePrompt (prompt) {
       if (this.activeTab === 'chat') {
         this.chatInput = prompt.description
@@ -458,14 +509,23 @@ export default {
         this.articleForm.requirement = prompt.description
       }
     },
+    /**
+     * 复制文章到剪贴板
+     */
     copyArticle () {
       navigator.clipboard.writeText(this.generatedArticle).then(() => {
         this.$message.success('文章已复制到剪贴板')
       })
     },
+    /**
+     * 编辑生成的文章
+     */
     editArticle () {
       this.$router.push(`/article/new?content=${encodeURIComponent(this.generatedArticle)}`)
     },
+    /**
+     * 滚动到聊天底部
+     */
     scrollToBottom () {
       this.$nextTick(() => {
         const chatMessages = this.$refs.chatMessages
@@ -474,22 +534,37 @@ export default {
         }
       })
     },
+    /**
+     * 跳转到首页
+     */
     goToHome () {
       this.$router.push('/')
     },
+    /**
+     * 跳转到个人中心
+     */
     goToUserCenter () {
       this.$router.push('/user/center')
       this.userMenuVisible = false
     },
+    /**
+     * 跳转到管理员后台
+     */
     goToAdmin () {
       this.$router.push('/admin')
       this.userMenuVisible = false
     },
+    /**
+     * 退出登录
+     */
     handleLogout () {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
       this.$router.push('/login')
     },
+    /**
+     * 切换用户菜单显示状态
+     */
     toggleUserMenu () {
       this.userMenuVisible = !this.userMenuVisible
     }

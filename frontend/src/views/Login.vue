@@ -3,15 +3,19 @@
     <el-card class="login-card">
       <div slot="header" class="login-title">用户登录</div>
       <el-form :model="loginForm" :rules="rules" ref="loginForm" label-width="0">
+        <!-- 用户名输入框 -->
         <el-form-item prop="username">
           <el-input v-model="loginForm.username" prefix-icon="el-icon-user" placeholder="用户名"></el-input>
         </el-form-item>
+        <!-- 密码输入框 -->
         <el-form-item prop="password">
           <el-input v-model="loginForm.password" type="password" prefix-icon="el-icon-lock" placeholder="密码"></el-input>
         </el-form-item>
+        <!-- 登录按钮 -->
         <el-form-item>
           <el-button type="primary" @click="handleLogin" class="login-button">登录</el-button>
         </el-form-item>
+        <!-- 底部链接 -->
         <el-form-item class="login-links">
           没有账号？<router-link to="/register" class="register-link">立即注册</router-link>
           <el-divider direction="vertical" class="divider"></el-divider>
@@ -23,16 +27,28 @@
 </template>
 
 <script>
-import axios from '../axios'
+/**
+ * 登录页面组件
+ * 功能：提供用户登录表单，处理登录逻辑，包括表单验证、API调用和错误处理
+ */
+import axios from '../axios' // 网络请求
 
 export default {
   name: 'LoginView',
   data () {
     return {
+      /**
+       * 登录表单数据
+       * @property {string} username - 用户名
+       * @property {string} password - 密码
+       */
       loginForm: {
         username: '',
         password: ''
       },
+      /**
+       * 表单验证规则
+       */
       rules: {
         username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
         password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
@@ -40,13 +56,20 @@ export default {
     }
   },
   methods: {
+    /**
+     * 处理登录逻辑
+     */
     handleLogin () {
+      // 表单验证
       this.$refs.loginForm.validate(async valid => {
         if (valid) {
           try {
+            // 调用登录API
             const response = await axios.post('/auth/login', this.loginForm)
+            // 存储token和用户信息到本地存储
             localStorage.setItem('token', response.data.token)
             localStorage.setItem('user', JSON.stringify(response.data.user))
+            // 显示登录成功消息
             this.$message.success({
               message: '登录成功',
               duration: 1500
@@ -55,6 +78,7 @@ export default {
             // 登录后跳转到主页
             this.$router.push('/')
           } catch (error) {
+            // 显示登录失败消息
             this.$message.error(error.response.data.message || '登录失败')
           }
         } else {
@@ -67,6 +91,10 @@ export default {
 </script>
 
 <style scoped>
+/**
+ * 登录页面样式
+ * 包含渐变背景、卡片样式、输入框样式和按钮样式
+ */
 .login {
   display: flex;
   justify-content: center;
