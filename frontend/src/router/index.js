@@ -21,6 +21,7 @@ import TagList from "../views/admin/TagList.vue"; // 标签管理
 import CommentList from "../views/admin/CommentList.vue"; // 评论管理
 import MessageList from "../views/admin/MessageList.vue"; // 留言管理
 import UserList from "../views/admin/UserList.vue"; // 用户管理
+import AnnouncementList from "../views/admin/AnnouncementList.vue"; // 公告管理
 import Archives from "../views/Archives.vue"; // 文章归档
 import PrivateMessages from "../views/PrivateMessages.vue"; // 私信
 import TagPage from "../views/TagPage.vue"; // 标签页面
@@ -163,6 +164,12 @@ const routes = [
         path: "users",
         name: "AdminUsers",
         component: UserList, // 用户管理
+        meta: { requiresAuth: true }, // 需要登录
+      },
+      {
+        path: "announcements",
+        name: "AdminAnnouncements",
+        component: AnnouncementList, // 公告管理
         meta: { requiresAuth: true }, // 需要登录
       },
     ],

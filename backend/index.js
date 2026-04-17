@@ -16,6 +16,7 @@ const Message = require("./models/Message");
 const Notification = require("./models/Notification");
 const Follow = require("./models/Follow");
 const PrivateMessage = require("./models/PrivateMessage");
+const Announcement = require("./models/Announcement");
 
 // Define associations
 Category.hasMany(Article, { foreignKey: "category_id" });
@@ -131,6 +132,7 @@ const followRoutes = require("./routes/follows");
 const privateMessageRoutes = require("./routes/privateMessages");
 const userRoutes = require("./routes/users");
 const aiRoutes = require("./routes/ai");
+const announcementRoutes = require("./routes/announcements");
 const path = require("path");
 
 // Middleware
@@ -163,6 +165,7 @@ app.use("/api/follows", followRoutes);
 app.use("/api/privateMessages", privateMessageRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/announcements", announcementRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -175,6 +178,26 @@ const startServer = async () => {
   try {
     await connectDB();
     console.log("Database connected successfully.");
+    // Sync database models
+    await sequelize.sync({ force: false });
+    console.log("Database synced successfully.");
+
+    // Try to create announcements table if not exists
+    try {
+      await sequelize.query(`
+        CREATE TABLE IF NOT EXISTS announcements (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          title VARCHAR(255) NOT NULL,
+          content TEXT NOT NULL,
+          is_active BOOLEAN DEFAULT true,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        )
+      `);
+      console.log("Announcements table created successfully.");
+    } catch (error) {
+      console.error("Failed to create announcements table:", error);
+    }
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });

@@ -8,6 +8,8 @@
         <div class="main-layout">
           <!-- 左侧内容区 (75%) -->
           <div class="left-container">
+            <!-- 公告栏 -->
+            <announcement-bar></announcement-bar>
             <div class="articles-grid">
               <template v-if="articles.length > 0">
                 <!-- 文章列表 -->
@@ -118,6 +120,7 @@
  */
 import axios from '../axios'
 import NavBar from '@/components/NavBar.vue' // 导航栏组件
+import AnnouncementBar from '@/components/AnnouncementBar.vue' // 公告栏组件
 import PopularArticles from '@/components/PopularArticles.vue' // 热门文章组件
 import RandomArticles from '@/components/RandomArticles.vue' // 随机文章推荐组件
 
@@ -125,6 +128,7 @@ export default {
   name: 'HomeView',
   components: {
     NavBar,
+    AnnouncementBar,
     PopularArticles,
     RandomArticles
   },

@@ -33,6 +33,10 @@
             <i class="el-icon-user"></i>
             <span slot="title">用户管理</span>
           </el-menu-item>
+          <el-menu-item index="/admin/announcements">
+            <i class="el-icon-bell"></i>
+            <span slot="title">公告管理</span>
+          </el-menu-item>
           <el-menu-item index="/">
             <i class="el-icon-s-home"></i>
             <span slot="title">返回前台</span>

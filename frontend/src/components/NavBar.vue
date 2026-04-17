@@ -1,57 +1,59 @@
 <template>
-  <el-header class="header">
-    <div class="header-content">
-      <!-- 网站Logo -->
-      <div class="logo" @click="goToHome">个人技术博客</div>
+  <div>
+    <el-header class="header">
+      <div class="header-content">
+        <!-- 网站Logo -->
+        <div class="logo" @click="goToHome">个人技术博客</div>
 
-      <!-- 搜索栏 -->
-      <div class="nav-center">
-        <div class="search-bar">
-          <search-box v-if="showSearch"></search-box>
-        </div>
-      </div>
-
-      <!-- 右侧导航 -->
-      <div class="nav-right">
-        <!-- 通知铃铛 -->
-        <notification-bell v-if="isLoggedIn" class="nav-notification"></notification-bell>
-
-        <!-- 私信入口 -->
-        <div v-if="isLoggedIn" class="nav-message" @click="goToPrivateMessages">
-          <i class="el-icon-chat-line-round"></i>
-          <el-badge v-if="unreadMessageCount > 0" :value="unreadMessageCount" type="danger"
-            class="message-badge"></el-badge>
-        </div>
-
-        <!-- 导航菜单 -->
-        <el-menu mode="horizontal" router :default-active="$route.path" class="nav-menu">
-          <el-menu-item index="/">首页</el-menu-item>
-          <el-menu-item index="/ai-assistant">AI助手</el-menu-item>
-          <el-menu-item index="/users/rank">排行榜</el-menu-item>
-          <el-menu-item index="/archives">归档</el-menu-item>
-          <el-menu-item index="/messages">留言板</el-menu-item>
-          <el-menu-item v-if="!isLoggedIn" index="/login">登录</el-menu-item>
-          <el-menu-item v-if="!isLoggedIn" index="/register">注册</el-menu-item>
-        </el-menu>
-
-        <!-- 用户菜单 -->
-        <div v-if="isLoggedIn" class="user-menu-container">
-          <div class="user-nav" @click="toggleUserMenu">
-            <el-avatar v-if="currentUser.avatar" :size="30" :src="currentUser.avatar"
-              style="margin-right: 8px; vertical-align: middle"></el-avatar>
-            <i v-else class="el-icon-user" style="margin-right: 8px"></i>
-            <span>{{ currentUser.username }}</span>
-            <i class="el-icon-arrow-down" style="margin-left: 8px"></i>
-          </div>
-          <div v-if="userMenuVisible" class="user-dropdown-menu">
-            <div class="dropdown-item" @click="goToUserCenter">个人中心</div>
-            <div class="dropdown-item" v-if="isAdmin" @click="goToAdmin">系统后台</div>
-            <div class="dropdown-item" @click="handleLogout">退出登录</div>
+        <!-- 搜索栏 -->
+        <div class="nav-center">
+          <div class="search-bar">
+            <search-box v-if="showSearch"></search-box>
           </div>
         </div>
+
+        <!-- 右侧导航 -->
+        <div class="nav-right">
+          <!-- 通知铃铛 -->
+          <notification-bell v-if="isLoggedIn" class="nav-notification"></notification-bell>
+
+          <!-- 私信入口 -->
+          <div v-if="isLoggedIn" class="nav-message" @click="goToPrivateMessages">
+            <i class="el-icon-chat-line-round"></i>
+            <el-badge v-if="unreadMessageCount > 0" :value="unreadMessageCount" type="danger"
+              class="message-badge"></el-badge>
+          </div>
+
+          <!-- 导航菜单 -->
+          <el-menu mode="horizontal" router :default-active="$route.path" class="nav-menu">
+            <el-menu-item index="/">首页</el-menu-item>
+            <el-menu-item index="/ai-assistant">AI助手</el-menu-item>
+            <el-menu-item index="/users/rank">排行榜</el-menu-item>
+            <el-menu-item index="/archives">归档</el-menu-item>
+            <el-menu-item index="/messages">留言板</el-menu-item>
+            <el-menu-item v-if="!isLoggedIn" index="/login">登录</el-menu-item>
+            <el-menu-item v-if="!isLoggedIn" index="/register">注册</el-menu-item>
+          </el-menu>
+
+          <!-- 用户菜单 -->
+          <div v-if="isLoggedIn" class="user-menu-container">
+            <div class="user-nav" @click="toggleUserMenu">
+              <el-avatar v-if="currentUser.avatar" :size="30" :src="currentUser.avatar"
+                style="margin-right: 8px; vertical-align: middle"></el-avatar>
+              <i v-else class="el-icon-user" style="margin-right: 8px"></i>
+              <span>{{ currentUser.username }}</span>
+              <i class="el-icon-arrow-down" style="margin-left: 8px"></i>
+            </div>
+            <div v-if="userMenuVisible" class="user-dropdown-menu">
+              <div class="dropdown-item" @click="goToUserCenter">个人中心</div>
+              <div class="dropdown-item" v-if="isAdmin" @click="goToAdmin">系统后台</div>
+              <div class="dropdown-item" @click="handleLogout">退出登录</div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-  </el-header>
+    </el-header>
+  </div>
 </template>
 
 <script>

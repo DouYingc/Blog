@@ -189,7 +189,8 @@ export default {
     async fetchMessages (userId) {
       this.loading = true
       try {
-        const response = await axios.get(`/privateMessages/conversation/${userId}`)
+        // 获取所有消息，设置较大的limit值
+        const response = await axios.get(`/privateMessages/conversation/${userId}?limit=100`)
         this.messages = response.data.messages
 
         // 获取用户信息
@@ -226,6 +227,8 @@ export default {
 
         // 重新获取消息
         await this.fetchMessages(this.activeConversationId)
+        // 重新获取对话列表，更新最新消息预览
+        await this.fetchConversations()
         this.$message.success('消息发送成功')
       } catch (error) {
         this.$message.error(error.response?.data?.message || '消息发送失败')
@@ -245,7 +248,8 @@ export default {
       if (isToday) {
         return `今天 ${date.toLocaleString('zh-CN', {
           hour: '2-digit',
-          minute: '2-digit'
+          minute: '2-digit',
+          hour12: false
         })}`
       } else {
         return date.toLocaleString('zh-CN', {
@@ -253,7 +257,8 @@ export default {
           month: 'long',
           day: 'numeric',
           hour: '2-digit',
-          minute: '2-digit'
+          minute: '2-digit',
+          hour12: false
         })
       }
     },

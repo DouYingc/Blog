@@ -1,7 +1,9 @@
 <template>
   <div class="notification-bell">
-    <i class="el-icon-bell" @click="toggleNotifications"></i>
-    <span v-if="unreadCount > 0" class="notification-badge">{{ unreadCount }}</span>
+    <div class="bell-wrapper" @click="toggleNotifications">
+      <i class="el-icon-bell"></i>
+      <el-badge v-if="unreadCount > 0" :value="unreadCount" type="danger" class="notification-badge"></el-badge>
+    </div>
 
     <div v-if="showNotifications" class="notification-dropdown">
       <div class="notification-header">
@@ -310,19 +312,22 @@ export default {
   cursor: pointer;
 }
 
+.bell-wrapper {
+  position: relative;
+  display: inline-block;
+  font-size: 20px;
+  color: #606266;
+  padding: 8px;
+}
+
+.bell-wrapper:hover {
+  color: #409eff;
+}
+
 .notification-badge {
   position: absolute;
-  top: -5px;
-  right: -5px;
-  background-color: #f56c6c;
-  color: white;
-  border-radius: 50%;
-  min-width: 18px;
-  height: 18px;
-  font-size: 12px;
-  line-height: 18px;
-  text-align: center;
-  padding: 0 6px;
+  top: 0;
+  right: 0;
 }
 
 .notification-dropdown {
